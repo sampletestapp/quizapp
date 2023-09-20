@@ -1,0 +1,1 @@
+businesslogic with c# accessing sql server is placed in this folder
