@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question and Answer App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+    <h1>Question and Answer App</h1>
+
+    <label for="question">Question:</label>
+    <input type="text" id="question" placeholder="Enter your question">
+
+    <label for="questionType">Question Type:</label>
+    <select id="questionType">
+        <option value="single">Single Selection</option>
+        <option value="multiple">Multiple Choice</option>
+        <option value="trueFalse">True/False</option>
+    </select>
+
+    <div id="choices">
+        <label for="choice">Choices:</label>
+        <div class="choice-group">
+            <input type="text" class="choice" placeholder="Enter choice">
+            <button class="addChoice">Add Choice</button>
+        </div>
+    </div>
+    
+    <div id="findings">
+        <label for="finding">Findings:</label>
+        <div class="finding-group">
+            <input type="text" class="finding" placeholder="Enter finding">
+            <button class="addFinding">Add Finding</button>
+        </div>
+    </div>
+    
+    <div id="recommendations">
+        <label for="recommendation">Recommendations:</label>
+        <div class="recommendation-group">
+            <input type="text" class="recommendation" placeholder="Enter recommendation">
+            <button class="addRecommendation">Add Recommendation</button>
+        </div>
+    </div>
+
+    <button id="saveQuestion">Save Question</button>
+
+    <script src="script.js"></script>
+</body>
+</html>

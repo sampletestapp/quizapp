@@ -1,0 +1,67 @@
+/* Add general styles */
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Add specific styles for choices, findings, and recommendations */
+.choice, .finding, .recommendation {
+    margin-bottom: 5px;
+}
+
+.addChoice, .addFinding, .addRecommendation {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.addChoice:hover, .addFinding:hover, .addRecommendation:hover {
+    background-color: #218838;
+}
+
+.choice-group,
+.finding-group,
+.recommendation-group {
+    display: flex;
+    align-items: center;
+}
+
+.remove-button {
+    margin-left: 10px;
+    background-color: #dc3545;
+}
