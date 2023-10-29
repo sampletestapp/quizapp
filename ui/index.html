@@ -1,52 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Question and Answer App</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Questions Form</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+    <div class="questionnaire-container">
+        <div class="questionnaire-form">
+            <!-- Question -->
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" required /><br /><br />
+            <!-- QuestionType -->
+            <label for="questionType">Question Type</label>
+            <select id="questionType" name="questionType" required>
+                <option value="trueFalse">True/False</option>
+                <option value="blank">Input</option>
+                <option value="singleSelection">Single Selection</option>
+                <option value="multipleChoiceSelection">Multiple Choice Selection</option>
+            </select><br /><br />
+            <!-- QuestionSeverity -->
+            <label for="questionSeverity">Question Severity</label>
+            <select id="questionSeverity" name="questionSeverity" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select><br /><br />
 
-    <h1>Question and Answer App</h1>
+            <div class="answer-container" id="trueFalseAnswer">
+                <label>Select</label><br />
+                <input type="radio" name="trueFalseAnswer" value="true">True<br />
+                <input type="radio" name="trueFalseAnswer" value="false">False<br />
+            </div>
+            <div class="answer-container" id="blankAnswer">
+                <label>Answer</label><br />
+                <input type="text" name="blankAnswer" /><br />
+            </div>
+            <div class="answer-container" id="singleSelectionAnswers">
+                <label>Ansers:</label><br />
+                <div id="singleSelectionOptions">
+                </div>
+                <button type="button" class="addAnswer" data-type="singleSelection">Add Answer</button>
+            </div>
+            <div class="answer-container" id="multipleChoiceSelectionAnswers">
+                <label>Ansers:</label><br />
+                <div id="multipleChoiceSelectionOptions">
+                </div>
+                <button type="button" class="addAnswer" data-type="multipleChoiceSelection">Add Answer</button>
+            </div>
+            <br /><br />
+            <button id="saveQuestion">Save Question</button>
+        </div>
 
-    <label for="question">Question:</label>
-    <input type="text" id="question" placeholder="Enter your question">
-
-    <label for="questionType">Question Type:</label>
-    <select id="questionType">
-        <option value="single">Single Selection</option>
-        <option value="multiple">Multiple Choice</option>
-        <option value="trueFalse">True/False</option>
-    </select>
-
-    <div id="choices">
-        <label for="choice">Choices:</label>
-        <div class="choice-group">
-            <input type="text" class="choice" placeholder="Enter choice">
-            <button class="addChoice">Add Choice</button>
+        <div class="questionnaire-display">
+            <h2>Questions</h2>
+            <div id="questionList"></div>
         </div>
     </div>
-    
-    <div id="findings">
-        <label for="finding">Findings:</label>
-        <div class="finding-group">
-            <input type="text" class="finding" placeholder="Enter finding">
-            <button class="addFinding">Add Finding</button>
-        </div>
-    </div>
-    
-    <div id="recommendations">
-        <label for="recommendation">Recommendations:</label>
-        <div class="recommendation-group">
-            <input type="text" class="recommendation" placeholder="Enter recommendation">
-            <button class="addRecommendation">Add Recommendation</button>
-        </div>
-    </div>
-
-    <button id="saveQuestion">Save Question</button>
-
     <script src="script.js"></script>
 </body>
+
 </html>

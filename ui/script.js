@@ -1,98 +1,114 @@
-$(document).ready(function(){
-    // Function to handle question type change
-    $('#questionType').change(function(){
-        var type = $(this).val();
-        if (type == 'single' || type == 'multiple') {
-            $('#choices').show();
-        } else {
-            $('#choices').hide();
+$(document).ready(function () {
+    $("#questionType").change(function () {
+      var selectedType = $(this).val();
+      $(".answer-container").hide();
+      if (selectedType === "trueFalse") {
+        $("#" + selectedType + "Answer").show();
+        $('[name="trueFalseAnswer"]').prop("checked", false);
+      } else if (selectedType === "blank") {
+        $("#" + selectedType + "Answer").show();
+      } else {
+        $("#" + selectedType + "Answers").show();
+        $("#" + selectedType + "Options").empty();
+      }
+    });
+  
+    //On page load trigger change event
+    $("#questionType").trigger("change");
+  
+    $(".addAnswer").click(function () {
+      var type = $(this).data("type");
+      var optionsContainer = $("#" + type + "Options");
+      optionsContainer.append(`<div><input type="text" name="${type}Answer">
+              <div class="recomendationsContainer">
+              <label for="recommendations">Recommendations:</label>
+              <input type="text" name="recommendations" class="recommendations">
+              <button type="button" class="addRecommendation">Add Recommendation</button>
+              </div>
+              <div class="rfindingsContainer">
+              <label for="findings">Findings:</label>
+              <input type="text" name="findings" class="findings">
+              <button type="button" class="addFinding">Add Finding</button>
+              </div>
+              <button type="button" class="removeAnswer">❌Remove Answer</button></div>`);
+    });
+  
+    $(document).on("click", ".removeAnswer", function () {
+      $(this).parent().remove();
+    });
+    $(document).on("click", ".removeRecommendation", function () {
+      $(this).prev().remove();
+      $(this).remove();
+    });
+    $(document).on("click", ".removeFinding", function () {
+      $(this).prev().remove();
+      $(this).remove();
+    });
+  
+    $(document).on("click", ".addRecommendation", function () {
+      $(
+        this
+      ).before(`<input type="text" name="recommendations" class="recommendations">
+          <button type="button" class="removeRecommendation">❌Remove Recomendation</button>`);
+    });
+  
+    $(document).on("click", ".addFinding", function () {
+      $(this).before(`<input type="text" name="findings" class="findings">
+          <button type="button" class="removeFinding">❌Remove Finding</button>`);
+    });
+  
+    //on submitting form
+    $("#saveQuestion").click(function (e) {
+      e.preventDefault();
+      var question = {
+        text: $("#question").val(),
+        questionTypeId: $("#questionType").val(),
+        section: $("#section").val(),
+        questionSeverityId: $("#severity").val(),
+        answers: []
+      };
+  
+      $(".answer-container").each(function () {
+        var answerText = $(this).find('input[name$="Answer"]').val();
+  
+        if (answerText !== "") {
+          var answer = {
+            answerText: answerText,
+            recommendations: [],
+            findings: []
+          };
+  
+          $(this)
+            .find(".recomendationsContainer .recommendations")
+            .each(function () {
+              var recommendation = $(this).val();
+              if (recommendation !== "") {
+                answer.recommendations.push(recommendation);
+              }
+            });
+  
+          $(this)
+            .find(".rfindingsContainer .findings")
+            .each(function () {
+              var finding = $(this).val();
+              if (finding !== "") {
+                answer.findings.push(finding);
+              }
+            });
+  
+          question.answers.push(answer);
         }
+      });
+  
+      // Remove empty recommendation and finding arrays
+      question.answers = question.answers.filter(
+        (answer) =>
+          answer.recommendations.length > 0 || answer.findings.length > 0
+      );
+  
+      $("#questionList").append(
+        '<div class="questionList">' + JSON.stringify(question) + "</div>"
+      );
     });
-
-    // Function to add more choices
-    $('#choices').on('click', '.addChoice', function(){
-        var newChoiceGroup = $('<div class="choice-group">');
-        newChoiceGroup.append('<input type="text" class="choice" placeholder="Enter choice">');
-        newChoiceGroup.append('<button class="addChoice">Add Choice</button>');
-        newChoiceGroup.append('<button class="remove-button removeChoice">Remove</button>');
-        $('#choices').append(newChoiceGroup);
-    });
-
-    // Function to add more findings
-    $('#findings').on('click', '.addFinding', function(){
-        var newFindingGroup = $('<div class="finding-group">');
-        newFindingGroup.append('<input type="text" class="finding" placeholder="Enter finding">');
-        newFindingGroup.append('<button class="addFinding">Add Finding</button>');
-        newFindingGroup.append('<button class="remove-button removeFinding">Remove</button>');
-        $('#findings').append(newFindingGroup);
-    });
-
-    // Function to add more recommendations
-    $('#recommendations').on('click', '.addRecommendation', function(){
-        var newRecommendationGroup = $('<div class="recommendation-group">');
-        newRecommendationGroup.append('<input type="text" class="recommendation" placeholder="Enter recommendation">');
-        newRecommendationGroup.append('<button class="addRecommendation">Add Recommendation</button>');
-        newRecommendationGroup.append('<button class="remove-button removeRecommendation">Remove</button>');
-        $('#recommendations').append(newRecommendationGroup);
-    });
-
-    // Function to remove choices
-    $('#choices').on('click', '.removeChoice', function(){
-        $(this).parent('.choice-group').remove();
-    });
-
-    // Function to remove findings
-    $('#findings').on('click', '.removeFinding', function(){
-        $(this).parent('.finding-group').remove();
-    });
-
-    // Function to remove recommendations
-    $('#recommendations').on('click', '.removeRecommendation', function(){
-        $(this).parent('.recommendation-group').remove();
-    });
-
-    // Function to save the question
-    $('#saveQuestion').click(function(){
-        var question = $('#question').val();
-        var type = $('#questionType').val();
-        var choices = [];
-        var findings = [];
-        var recommendations = [];
-
-        // Get choices
-        $('.choice').each(function(){
-            choices.push($(this).val());
-        });
-
-        // Get findings
-        $('.finding').each(function(){
-            findings.push($(this).val());
-        });
-
-        // Get recommendations
-        $('.recommendation').each(function(){
-            recommendations.push($(this).val());
-        });
-
-        var data = {
-            question: question,
-            type: type,
-            choices: choices,
-            findings: findings,
-            recommendations: recommendations
-        };
-
-        // Send data to the API
-        $.ajax({
-            url: 'http://localhost:5253/',
-            type: 'POST',
-            data: data,
-            success: function(response) {
-                alert('Question saved successfully!');
-            },
-            error: function(error) {
-                alert('Error saving question');
-            }
-        });
-    });
-});
+  });
+  

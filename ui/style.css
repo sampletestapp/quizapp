@@ -1,67 +1,84 @@
-/* Add general styles */
-body {
-    font-family: Arial, sans-serif;
+/* Style for the container */
+.questionnaire-container {
     max-width: 800px;
     margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Style for the form */
+  .questionnaire-form {
+    background-color: #f9f9f9;
     padding: 20px;
-}
-
-h1 {
-    text-align: center;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Style for labels */
+  label {
     font-weight: bold;
-}
-
-input[type="text"],
-select {
+  }
+  
+  /* Style for inputs and selects */
+  input[type="text"],
+  select {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-}
-
-button {
-    padding: 10px 20px;
-    background-color: #007BFF;
+  }
+  
+  /* Style for buttons */
+  button {
+    padding: 8px 16px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #555;
+    color: #fff;
+  }
+  
+  /* Style for answer containers */
+  .answer-container {
+    display: none;
+  }
+  
+  /* Style for answer containers with specific IDs */
+  #trueFalseAnswer,
+  #blankAnswer,
+  #singleSelectionAnswers,
+  #multipleChoiceSelectionAnswers {
+    display: block;
+  }
+  
+  /* Style for recommendation and finding containers */
+  .recomendationsContainer,
+  .rfindingsContainer {
+    margin-top: 10px;
+  }
+  
+  /* Style for remove buttons */
+  .removeAnswer,
+  .removeRecommendation,
+  .removeFinding {
+    background-color: #ff5555;
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-/* Add specific styles for choices, findings, and recommendations */
-.choice, .finding, .recommendation {
-    margin-bottom: 5px;
-}
-
-.addChoice, .addFinding, .addRecommendation {
-    background-color: #28a745;
-    color: #fff;
-}
-
-.addChoice:hover, .addFinding:hover, .addRecommendation:hover {
-    background-color: #218838;
-}
-
-.choice-group,
-.finding-group,
-.recommendation-group {
-    display: flex;
-    align-items: center;
-}
-
-.remove-button {
-    margin-left: 10px;
-    background-color: #dc3545;
-}
+    font-size: 14px;
+  }
+  
+  /* Style for question list */
+  .questionList {
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #fff;
+  }
+  
