@@ -3,11 +3,29 @@ $(document).ready(function () {
     var selectedType = $(this).val();
     $(".answer-container").remove(); // Remove all existing answer containers
 
-  if (selectedType === "blank") {
+    if (selectedType === "trueFalse") {
+      $("#questionType").after(`
+              <div class="answer-container" id="trueFalseAnswer">
+                  <label>Select</label><br />
+                  <input type="radio" name="trueFalseAnswer" value="true">True<br />
+                  <input type="radio" name="trueFalseAnswer" value="false">False<br />
+              </div>
+          `);
+    } else if (selectedType === "blank") {
       $("#questionType").after(`
               <div class="answer-container" id="blankAnswer">
                   <label>Answer</label><br />
                   <input type="text" name="blankAnswer" /><br />
+                  <div class="recomendationsContainer">
+                      <label for="recommendations">Recommendations:</label>
+                      <input type="text" name="recommendations" class="recommendations">
+                      <button type="button" class="addRecommendation">Add Recommendation</button>
+                  </div>
+                  <div class="rfindingsContainer">
+                      <label for="findings">Findings:</label>
+                      <input type="text" name="findings" class="findings">
+                      <button type="button" class="addFinding">Add Finding</button>
+                  </div>
               </div>
           `);
     } else {
@@ -50,12 +68,34 @@ $(document).ready(function () {
 
   $(document).on("click", ".addRecommendation", function () {
     var answerId = $(this).data("answer-id");
-    // Use answerId to associate recommendation with the corresponding answer
+    var recommendationId = Date.now(); // Generate a unique ID for the recommendation
+    $(this).before(`
+        <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">
+        <button type="button" class="removeRecommendation" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button>
+    `);
   });
 
   $(document).on("click", ".addFinding", function () {
     var answerId = $(this).data("answer-id");
-    // Use answerId to associate finding with the corresponding answer
+    var findingId = Date.now(); // Generate a unique ID for the finding
+    $(this).before(`
+        <input type="text" name="findings" class="findings" data-answer-id="${answerId}" data-finding-id="${findingId}">
+        <button type="button" class="removeFinding" data-answer-id="${answerId}" data-finding-id="${findingId}">❌Remove Finding</button>
+    `);
+  });
+
+  $(document).on("click", ".removeRecommendation", function () {
+    var answerId = $(this).data("answer-id");
+    var recommendationId = $(this).data("recommendation-id");
+    $(`input.recommendations[data-answer-id="${answerId}"][data-recommendation-id="${recommendationId}"]`).remove();
+    $(this).remove();
+  });
+
+  $(document).on("click", ".removeFinding", function () {
+    var answerId = $(this).data("answer-id");
+    var findingId = $(this).data("finding-id");
+    $(`input.findings[data-answer-id="${answerId}"][data-finding-id="${findingId}"]`).remove();
+    $(this).remove();
   });
 
   $(document).on("click", ".removeAnswer", function () {
