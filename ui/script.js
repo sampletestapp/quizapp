@@ -1,65 +1,79 @@
 $(document).ready(function () {
   $("#questionType").change(function () {
     var selectedType = $(this).val();
-    $(".answer-container").hide();
+    $(".answer-container").remove(); // Remove all existing answer containers
+
     if (selectedType === "trueFalse") {
-      $("#" + selectedType + "Answer").show();
-      $('[name="trueFalseAnswer"]').prop("checked", false);
+      $("#questionType").after(`
+              <div class="answer-container" id="trueFalseAnswer">
+                  <label>Select</label><br />
+                  <input type="radio" name="trueFalseAnswer" value="true">True<br />
+                  <input type="radio" name="trueFalseAnswer" value="false">False<br />
+              </div>
+          `);
     } else if (selectedType === "blank") {
-      $("#" + selectedType + "Answer").show();
+      $("#questionType").after(`
+              <div class="answer-container" id="blankAnswer">
+                  <label>Answer</label><br />
+                  <input type="text" name="blankAnswer" /><br />
+              </div>
+          `);
     } else {
-      $("#" + selectedType + "Answers").show();
-      $("#" + selectedType + "Options").empty();
+      $("#questionType").after(`
+              <div class="answer-container" id="${selectedType}Answers">
+                  <label>Answers:</label><br />
+                  <div id="${selectedType}Options">
+                  </div>
+                  <button type="button" class="addAnswer" data-type="${selectedType}">Add Answer</button>
+              </div>
+          `);
     }
   });
 
-  //On page load trigger change event
   $("#questionType").trigger("change");
 
-  $(".addAnswer").click(function () {
+  $(document).on("click", ".addAnswer", function () {
     var type = $(this).data("type");
     var optionsContainer = $("#" + type + "Options");
-    optionsContainer.append(`<div><input type="text" name="${type}Answer">
+
+    var answerId = Date.now(); // Generate a unique ID for the answer
+
+    optionsContainer.append(`
+          <div class="answer" data-answer-id="${answerId}">
+              <input type="text" name="${type}Answer">
               <div class="recomendationsContainer">
-              <label for="recommendations">Recommendations:</label>
-              <input type="text" name="recommendations" class="recommendations">
-              <button type="button" class="addRecommendation">Add Recommendation</button>
+                  <label for="recommendations">Recommendations:</label>
+                  <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}">
+                  <button type="button" class="addRecommendation" data-answer-id="${answerId}">Add Recommendation</button>
               </div>
               <div class="rfindingsContainer">
-              <label for="findings">Findings:</label>
-              <input type="text" name="findings" class="findings">
-              <button type="button" class="addFinding">Add Finding</button>
+                  <label for="findings">Findings:</label>
+                  <input type="text" name="findings" class="findings" data-answer-id="${answerId}">
+                  <button type="button" class="addFinding" data-answer-id="${answerId}">Add Finding</button>
               </div>
-              <button type="button" class="removeAnswer">❌Remove Answer</button></div>`);
+              <button type="button" class="removeAnswer">❌Remove Answer</button>
+          </div>
+      `);
+  });
+
+  $(document).on("click", ".addRecommendation", function () {
+    var answerId = $(this).data("answer-id");
+    // Use answerId to associate recommendation with the corresponding answer
+  });
+
+  $(document).on("click", ".addFinding", function () {
+    var answerId = $(this).data("answer-id");
+    // Use answerId to associate finding with the corresponding answer
   });
 
   $(document).on("click", ".removeAnswer", function () {
     $(this).parent().remove();
   });
-  $(document).on("click", ".removeRecommendation", function () {
-    $(this).prev().remove();
-    $(this).remove();
-  });
-  $(document).on("click", ".removeFinding", function () {
-    $(this).prev().remove();
-    $(this).remove();
-  });
-
-  $(document).on("click", ".addRecommendation", function () {
-    $(
-      this
-    ).before(`<input type="text" name="recommendations" class="recommendations">
-          <button type="button" class="removeRecommendation">❌Remove Recomendation</button>`);
-  });
-
-  $(document).on("click", ".addFinding", function () {
-    $(this).before(`<input type="text" name="findings" class="findings">
-          <button type="button" class="removeFinding">❌Remove Finding</button>`);
-  });
 
   //on submitting form
   $("#saveQuestion").click(function (e) {
     e.preventDefault();
+
     var question = {
       text: $("#question").val(),
       questionTypeId: $("#questionType").val(),
@@ -68,8 +82,9 @@ $(document).ready(function () {
       answers: []
     };
 
-    $(".answer-container").each(function () {
+    $(".answer").each(function () {
       var answerText = $(this).find('input[name$="Answer"]').val();
+      var answerId = $(this).data("answer-id");
 
       if (answerText !== "") {
         var answer = {
@@ -78,23 +93,23 @@ $(document).ready(function () {
           findings: []
         };
 
-        $(this)
-          .find(".recomendationsContainer .recommendations")
-          .each(function () {
-            var recommendation = $(this).val();
-            if (recommendation !== "") {
-              answer.recommendations.push(recommendation);
-            }
-          });
+        // Get associated recommendations
+        var recommendations = $(`input.recommendations[data-answer-id="${answerId}"]`);
+        recommendations.each(function () {
+          var recommendation = $(this).val();
+          if (recommendation !== "") {
+            answer.recommendations.push(recommendation);
+          }
+        });
 
-        $(this)
-          .find(".rfindingsContainer .findings")
-          .each(function () {
-            var finding = $(this).val();
-            if (finding !== "") {
-              answer.findings.push(finding);
-            }
-          });
+        // Get associated findings
+        var findings = $(`input.findings[data-answer-id="${answerId}"]`);
+        findings.each(function () {
+          var finding = $(this).val();
+          if (finding !== "") {
+            answer.findings.push(finding);
+          }
+        });
 
         question.answers.push(answer);
       }
