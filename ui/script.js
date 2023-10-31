@@ -3,17 +3,9 @@ $(document).ready(function () {
     var selectedType = $(this).val();
     $(".answer-container").remove(); // Remove all existing answer containers
 
-    if (selectedType === "trueFalse") {
+    if (selectedType === "blank") {
       $("#questionType").after(`
-              <div class="answer-container" id="trueFalseAnswer">
-                  <label>Select</label><br />
-                  <input type="radio" name="trueFalseAnswer" value="true">True<br />
-                  <input type="radio" name="trueFalseAnswer" value="false">False<br />
-              </div>
-          `);
-    } else if (selectedType === "blank") {
-      $("#questionType").after(`
-              <div class="answer-container" id="blankAnswer">
+              <div class="answer" id="blankAnswer">
                   <label>Answer</label><br />
                   <input type="text" name="blankAnswer" /><br />
                   <div class="recomendationsContainer">
