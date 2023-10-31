@@ -1,7 +1,8 @@
 $(document).ready(function () {
   $("#questionType").change(function () {
     var selectedType = $(this).val();
-    $(".answer-container").remove(); // Remove all existing answer containers
+    $(".answer-container").remove();
+    $(".answer").remove(); // Remove all existing answer containers
 
     if (selectedType === "blank") {
       $("#questionType").after(`
@@ -105,39 +106,57 @@ $(document).ready(function () {
       questionSeverityId: $("#questionSeverity").val(),
       answers: []
     };
+    if (question.questionTypeId === "blank") {
+      var answerText = $("input[name='blankAnswer']").val();
+      var recommendations = $("input.recommendations").map(function () {
+        return $(this).val();
+      }).get();
+      var findings = $("input.findings").map(function () {
+        return $(this).val();
+      }).get();
 
-    $(".answer").each(function () {
-      var answerText = $(this).find('input[name$="Answer"]').val();
-      var answerId = $(this).data("answer-id");
+      var answer = {
+        answerText: answerText,
+        recommendations: recommendations,
+        findings: findings
+      };
 
-      if (answerText !== "") {
-        var answer = {
-          answerText: answerText,
-          recommendations: [],
-          findings: []
-        };
+      question.answers.push(answer);
+    }
+    else {
+      $(".answer").each(function () {
+        var answerText = $(this).find('input[name$="Answer"]').val();
+        var answerId = $(this).data("answer-id");
 
-        // Get associated recommendations
-        var recommendations = $(`input.recommendations[data-answer-id="${answerId}"]`);
-        recommendations.each(function () {
-          var recommendation = $(this).val();
-          if (recommendation !== "") {
-            answer.recommendations.push(recommendation);
-          }
-        });
+        if (answerText !== "") {
+          var answer = {
+            answerText: answerText,
+            recommendations: [],
+            findings: []
+          };
 
-        // Get associated findings
-        var findings = $(`input.findings[data-answer-id="${answerId}"]`);
-        findings.each(function () {
-          var finding = $(this).val();
-          if (finding !== "") {
-            answer.findings.push(finding);
-          }
-        });
+          // Get associated recommendations
+          var recommendations = $(`input.recommendations[data-answer-id="${answerId}"]`);
+          recommendations.each(function () {
+            var recommendation = $(this).val();
+            if (recommendation !== "") {
+              answer.recommendations.push(recommendation);
+            }
+          });
 
-        question.answers.push(answer);
-      }
-    });
+          // Get associated findings
+          var findings = $(`input.findings[data-answer-id="${answerId}"]`);
+          findings.each(function () {
+            var finding = $(this).val();
+            if (finding !== "") {
+              answer.findings.push(finding);
+            }
+          });
+
+          question.answers.push(answer);
+        }
+      });
+    }
 
     // Remove empty recommendation and finding arrays
     question.answers = question.answers.filter(
