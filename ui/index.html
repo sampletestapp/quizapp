@@ -13,24 +13,31 @@
         <div class="questionnaire-form">
             <!-- Question -->
             <label for="question">Question:</label>
-            <input type="text" id="question" name="question" required /><br /><br />
+            <input type="text" id="question" name="question" required /><br />
             <!-- QuestionSeverity -->
             <label for="questionSeverity">Question Severity</label>
             <select id="questionSeverity" name="questionSeverity" required>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
-            </select><br /><br />
+            </select><br />
+            <!-- Zones -->
+            <label for="zones">Zones</label>
+            <select id="zones" name="zones">
+                <option value="PARKING">PARKING</option>
+                <option value="PATHWAYS">PATHWAYS</option>
+                <option value="ACCESSIBLE_ENTERANCE">ACCESSIBLE ENTRANCE</option>
+                <option value="INTERIOR_ROUTES">INTERIOR ROUTES</option>
+                <option value="VOTING_AREAS">VOTING AREAS</option>
+            </select>
             <!-- QuestionType -->
             <label for="questionType">Question Type</label>
             <select id="questionType" name="questionType" required>
                 <option value="blank">Input</option>
                 <option value="singleSelection">Single Selection</option>
                 <option value="multipleChoiceSelection">Multiple Choice Selection</option>
-            </select><br /><br />
+            </select>
 
-
-            <br /><br />
             <button id="saveQuestion">Save Question</button>
         </div>
 

@@ -103,6 +103,7 @@ $(document).ready(function () {
       text: $("#question").val(),
       questionTypeId: $("#questionType").val(),
       section: $("#section").val(),
+      zones: $("#zones").val(),
       questionSeverityId: $("#questionSeverity").val(),
       answers: []
     };
