@@ -3,7 +3,8 @@ $(document).ready(function () {
     var selectedType = $(this).val();
     $(".answer-container").remove();
     $(".answer").remove(); // Remove all existing answer containers
-
+    $("#questionList").empty();
+    
     if (selectedType === "blank") {
       $("#questionType").after(`
               <div class="answer" id="blankAnswer">
@@ -100,6 +101,7 @@ $(document).ready(function () {
     e.preventDefault();
 
     var question = {
+      questionId: $("#questionId").val(),
       text: $("#question").val(),
       questionTypeId: $("#questionType").val(),
       section: $("#section").val(),
