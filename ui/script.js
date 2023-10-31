@@ -165,7 +165,7 @@ $(document).ready(function () {
         answer.recommendations.length > 0 || answer.findings.length > 0
     );
 
-    $("#questionList").append(
+    $("#questionList").html(
       '<div class="questionList">' + JSON.stringify(question) + "</div>"
     );
   });
