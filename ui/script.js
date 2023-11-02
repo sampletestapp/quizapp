@@ -97,7 +97,7 @@ $(document).ready(function () {
   });
 
   //on submitting form
-  $("#saveQuestion").click(function (e) {
+  $("#questionForm").submit(function (e) {
     e.preventDefault();
 
     var question = {
@@ -170,5 +170,7 @@ $(document).ready(function () {
     $("#questionList").html(
       '<div class="questionList">' + JSON.stringify(question) + "</div>"
     );
+    // Reset form after successful save
+    $("#questionForm")[0].reset();
   });
 });

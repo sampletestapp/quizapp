@@ -10,7 +10,7 @@
 
 <body>
     <div class="questionnaire-container">
-        <div class="questionnaire-form">
+        <form class="questionnaire-form" id="questionForm">
             <!-- Question Id-->
             <label for="questionId">Question ID:</label>
             <input type="text" id="questionId" name="questionId" required /><br />
@@ -44,8 +44,8 @@
                 <option value="multipleChoiceSelection">Multiple Choice Selection</option>
             </select>
 
-            <button id="saveQuestion">Save Question</button>
-        </div>
+            <button type="submit">Save Question</button>
+        </form>
 
         <div class="questionnaire-display">
             <h2>Questions</h2>
