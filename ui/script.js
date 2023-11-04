@@ -1,8 +1,8 @@
 $(document).ready(function () {
   var sectionDropdown = $("#section");
-  for (var i = 65; i <= 90; i++) { // ASCII codes for A to Z
-    var letter = String.fromCharCode(i);
-    sectionDropdown.append(`<option value="${letter}">${letter}</option>`);
+  for (var i = 1; i <= 26; i++) {
+    var letter = String.fromCharCode(64 + i); // Convert number to corresponding ASCII character
+    sectionDropdown.append(`<option value="${i}">${letter}</option>`);
   }
 
   $("#questionType").change(function () {
@@ -110,8 +110,8 @@ $(document).ready(function () {
       Text: $("#question").val(),
       QuestionTypeId: questionTypeId,  // An integer value
       QuestionNumber: $("#questionNumber").val(),
-      Section: $("#section").val(),
-      Zones: $("#zones").val(),
+      SectionId: parseInt($("#section").val()),
+      ZoneId: parseInt($("#zones").val()),
       QuestionSeverityId: parseInt($("#questionSeverity").val()), // An integer value
       Answers: []  // An empty array or provide answers if needed
     };
@@ -125,8 +125,6 @@ $(document).ready(function () {
     recomendation = {
       text: ""
     }
-
-
 
     if (questionTypeValue === "blank") {
       var answerText = $("input[name='blankAnswer']").val();

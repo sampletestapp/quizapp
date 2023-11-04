@@ -35,6 +35,12 @@ builder.Services.AddDbContext<QuizDbContext>(options =>
 
 var app = builder.Build();
 
+using (var serviceScope = app.Services.GetService<IServiceScopeFactory>()?.CreateScope())
+{
+    var context = serviceScope?.ServiceProvider.GetRequiredService<QuizDbContext>();
+    context?.Database.Migrate();
+}
+
 app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
