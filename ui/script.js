@@ -18,7 +18,6 @@ $(document).ready(function () {
                   <div class="rfindingsContainer">
                       <label for="findings">Findings:</label>
                       <input type="text" name="findings" class="findings">
-                      <button type="button" class="addFinding">Add Finding</button>
                   </div>
               </div>
           `);
@@ -53,7 +52,6 @@ $(document).ready(function () {
               <div class="rfindingsContainer">
                   <label for="findings">Findings:</label>
                   <input type="text" name="findings" class="findings" data-answer-id="${answerId}">
-                  <button type="button" class="addFinding" data-answer-id="${answerId}">Add Finding</button>
               </div>
               <button type="button" class="removeAnswer">❌Remove Answer</button>
           </div>
@@ -69,26 +67,11 @@ $(document).ready(function () {
     `);
   });
 
-  $(document).on("click", ".addFinding", function () {
-    var answerId = $(this).data("answer-id");
-    var findingId = Date.now(); // Generate a unique ID for the finding
-    $(this).before(`
-        <input type="text" name="findings" class="findings" data-answer-id="${answerId}" data-finding-id="${findingId}">
-        <button type="button" class="removeFinding" data-answer-id="${answerId}" data-finding-id="${findingId}">❌Remove Finding</button>
-    `);
-  });
 
   $(document).on("click", ".removeRecommendation", function () {
     var answerId = $(this).data("answer-id");
     var recommendationId = $(this).data("recommendation-id");
     $(`input.recommendations[data-answer-id="${answerId}"][data-recommendation-id="${recommendationId}"]`).remove();
-    $(this).remove();
-  });
-
-  $(document).on("click", ".removeFinding", function () {
-    var answerId = $(this).data("answer-id");
-    var findingId = $(this).data("finding-id");
-    $(`input.findings[data-answer-id="${answerId}"][data-finding-id="${findingId}"]`).remove();
     $(this).remove();
   });
 
@@ -114,9 +97,7 @@ $(document).ready(function () {
       var recommendations = $("input.recommendations").map(function () {
         return $(this).val();
       }).get();
-      var findings = $("input.findings").map(function () {
-        return $(this).val();
-      }).get();
+      var findings = $("input.findings").val();
 
       var answer = {
         answerText: answerText,
@@ -135,7 +116,7 @@ $(document).ready(function () {
           var answer = {
             answerText: answerText,
             recommendations: [],
-            findings: []
+            findings: ""
           };
 
           // Get associated recommendations
@@ -148,13 +129,14 @@ $(document).ready(function () {
           });
 
           // Get associated findings
-          var findings = $(`input.findings[data-answer-id="${answerId}"]`);
-          findings.each(function () {
-            var finding = $(this).val();
-            if (finding !== "") {
-              answer.findings.push(finding);
-            }
-          });
+          var finding = $(`input.findings[data-answer-id="${answerId}"]`).val();
+          answer.findings = finding;
+          // findings.each(function () {
+          //   var finding = $(this).val();
+          //   if (finding !== "") {
+          //     answer.findings.push(finding);
+          //   }
+          // });
 
           question.answers.push(answer);
         }
