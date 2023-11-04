@@ -89,29 +89,67 @@ $(document).ready(function () {
   $("#questionForm").submit(function (e) {
     e.preventDefault();
 
-    var question = {
-      questionNumber: $("#questionNumber").val(),
-      text: $("#question").val(),
-      questionTypeId: $("#questionType").val(),
-      section: $("#section").val(),
-      zones: $("#zones").val(),
-      questionSeverityId: $("#questionSeverity").val(),
-      answers: []
-    };
-    if (question.questionTypeId === "blank") {
-      var answerText = $("input[name='blankAnswer']").val();
-      var recommendations = $("input.recommendations").map(function () {
-        return $(this).val();
-      }).get();
-      var findings = $("input.findings").val();
+    var questionTypeValue = $("#questionType").val();
 
-      var answer = {
-        answerText: answerText,
-        recommendations: recommendations,
-        findings: findings
+    var questionTypeId;
+
+    // Assign ids based on the selected value
+    if (questionTypeValue === "singleSelection") {
+      questionTypeId = 2;
+    } else if (questionTypeValue === "multipleChoiceSelection") {
+      questionTypeId = 3;
+    } else {
+      questionTypeId = 1;
+    }
+
+    // Now, questionTypeId will contain the appropriate integer value.
+
+
+    //questionDto Object
+    var questionDto = {
+      Text: $("#question").val(),
+      QuestionTypeId: questionTypeId,  // An integer value
+      QuestionNumber: $("#questionNumber").val(),
+      Section: $("#section").val(),
+      Zones: $("#zones").val(),
+      QuestionSeverityId: parseInt($("#questionSeverity").val()), // An integer value
+      Answers: []  // An empty array or provide answers if needed
+    };
+
+    var answer = {
+      text: '',
+      recommendations: [],
+      findings: ''
+    };
+
+    recomendation = {
+      text: ""
+    }
+
+
+
+    if (questionTypeValue === "blank") {
+      var answerText = $("input[name='blankAnswer']").val();
+      // Initialize an empty array to hold the recommendations
+      var recommendationsList = [];
+      // Assuming you have multiple input elements with class "recommendations"
+      $("input.recommendations").each(function () {
+        var recommendationText = $(this).val();
+        // Create a recommendation object with the text
+        var recommendation = {
+          text: recommendationText
+        };
+        // Add the recommendation to the list
+        recommendationsList.push(recommendation);
+      });
+      var findings = $("input.findings").val();
+      answer.text = answerText;
+      answer.recommendations= recommendationsList;
+      answer.findings = {
+        text: findings
       };
 
-      question.answers.push(answer);
+      questionDto.Answers.push(answer);
     }
     else {
       $(".answer").each(function () {
@@ -120,51 +158,60 @@ $(document).ready(function () {
 
         if (answerText !== "") {
           var answer = {
-            answerText: answerText,
+            text: answerText,
             recommendations: [],
             findings: ""
           };
 
-          // Get associated recommendations
-          var recommendations = $(`input.recommendations[data-answer-id="${answerId}"]`);
-          recommendations.each(function () {
-            var recommendation = $(this).val();
-            if (recommendation !== "") {
-              answer.recommendations.push(recommendation);
-            }
+          // Initialize an empty array to hold the recommendations
+          var recommendationsList = [];
+          // Assuming you have multiple input elements with class "recommendations"
+          $("input.recommendations").each(function () {
+            var recommendationText = $(this).val();
+            // Create a recommendation object with the text
+            var recommendation = {
+              text: recommendationText
+            };
+            // Add the recommendation to the list
+            recommendationsList.push(recommendation);
           });
 
           // Get associated findings
           var finding = $(`input.findings[data-answer-id="${answerId}"]`).val();
-          answer.findings = finding;
-          question.answers.push(answer);
+          answer.findings = {
+            text: finding
+          };
+          answer.recommendations = recommendationsList;
+          questionDto.Answers.push(answer);
         }
       });
     }
 
     // Remove empty recommendation and finding arrays
-    question.answers = question.answers.filter(
+    questionDto.Answers = questionDto.Answers.filter(
       (answer) =>
-        answer.recommendations.length > 0 || answer.findings.length > 0
+        answer.recommendations.length > 0 || answer.findings > 0
     );
 
     $.ajax({
-      url: 'http://localhost:5253/api/Questions', // Replace with the actual URL of your API endpoint
+      url: 'http://localhost:5253/api/Questions',  // Replace with your actual endpoint
       type: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify(question),
-      success: function (data) {
-        console.log('Question submitted successfully:', data);
+      data: JSON.stringify(questionDto),
+      success: function (result) {
+        console.log('Question created successfully', result);
+        // Handle success here
       },
       error: function (error) {
-        console.error('Error submitting question:', error);
+        console.error('Error creating question', error);
+        // Handle error here
       }
     });
 
     $("#questionList").html(
-      '<div class="questionList">' + JSON.stringify(question) + "</div>"
+      '<div class="questionList">' + JSON.stringify(questionDto) + "</div>"
     );
     // Reset form after successful save
-    $("#questionForm")[0].reset();
+    //$("#questionForm")[0].reset();
   });
 });
