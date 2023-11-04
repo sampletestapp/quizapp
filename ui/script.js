@@ -10,7 +10,7 @@ $(document).ready(function () {
     $(".answer-container").remove();
     $(".answer").remove(); // Remove all existing answer containers
     $("#questionList").empty();
-    
+
     if (selectedType === "blank") {
       $("#questionType").after(`
               <div class="answer" id="blankAnswer">
@@ -147,6 +147,19 @@ $(document).ready(function () {
       (answer) =>
         answer.recommendations.length > 0 || answer.findings.length > 0
     );
+
+    $.ajax({
+      url: 'http://localhost:5253/api/Questions', // Replace with the actual URL of your API endpoint
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(questionDto),
+      success: function (data) {
+        console.log('Question submitted successfully:', data);
+      },
+      error: function (error) {
+        console.error('Error submitting question:', error);
+      }
+    });
 
     $("#questionList").html(
       '<div class="questionList">' + JSON.stringify(question) + "</div>"
