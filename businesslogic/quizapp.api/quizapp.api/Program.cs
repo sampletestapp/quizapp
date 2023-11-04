@@ -7,6 +7,15 @@ using quizapp.api.Services;
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -25,6 +34,8 @@ builder.Services.AddDbContext<QuizDbContext>(options =>
    );
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
