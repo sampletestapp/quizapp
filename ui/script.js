@@ -1,4 +1,10 @@
 $(document).ready(function () {
+  var sectionDropdown = $("#section");
+  for (var i = 65; i <= 90; i++) { // ASCII codes for A to Z
+    var letter = String.fromCharCode(i);
+    sectionDropdown.append(`<option value="${letter}">${letter}</option>`);
+  }
+
   $("#questionType").change(function () {
     var selectedType = $(this).val();
     $(".answer-container").remove();
@@ -131,13 +137,6 @@ $(document).ready(function () {
           // Get associated findings
           var finding = $(`input.findings[data-answer-id="${answerId}"]`).val();
           answer.findings = finding;
-          // findings.each(function () {
-          //   var finding = $(this).val();
-          //   if (finding !== "") {
-          //     answer.findings.push(finding);
-          //   }
-          // });
-
           question.answers.push(answer);
         }
       });
