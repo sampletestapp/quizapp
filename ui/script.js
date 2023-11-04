@@ -152,7 +152,7 @@ $(document).ready(function () {
       url: 'http://localhost:5253/api/Questions', // Replace with the actual URL of your API endpoint
       type: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify(questionDto),
+      data: JSON.stringify(question),
       success: function (data) {
         console.log('Question submitted successfully:', data);
       },
