@@ -2,10 +2,12 @@
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace quizapp.api.Migrations
 {
     /// <inheritdoc />
-    public partial class initialmigration : Migration
+    public partial class initialData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +18,7 @@ namespace quizapp.api.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Severity = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Severity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,16 +39,43 @@ namespace quizapp.api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Sections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sections", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Zones",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Zones", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuestionNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Section = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuestionSeverityId = table.Column<int>(type: "int", nullable: false),
-                    QuestionTypeId = table.Column<int>(type: "int", nullable: false)
+                    SectionId = table.Column<int>(type: "int", nullable: false),
+                    QuestionTypeId = table.Column<int>(type: "int", nullable: false),
+                    ZoneId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,6 +90,18 @@ namespace quizapp.api.Migrations
                         name: "FK_Questions_QuestionTypes_QuestionTypeId",
                         column: x => x.QuestionTypeId,
                         principalTable: "QuestionTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Questions_Sections_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "Sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Questions_Zones_ZoneId",
+                        column: x => x.ZoneId,
+                        principalTable: "Zones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -125,6 +166,71 @@ namespace quizapp.api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "QuestionSeverity",
+                columns: new[] { "Id", "Severity" },
+                values: new object[,]
+                {
+                    { 1, 1 },
+                    { 2, 2 },
+                    { 3, 3 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "QuestionTypes",
+                columns: new[] { "Id", "TypeName" },
+                values: new object[,]
+                {
+                    { 1, "blank" },
+                    { 2, "singleSelection" },
+                    { 3, "multipleChoiceSelection" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Sections",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "A" },
+                    { 2, "B" },
+                    { 3, "C" },
+                    { 4, "D" },
+                    { 5, "E" },
+                    { 6, "F" },
+                    { 7, "G" },
+                    { 8, "H" },
+                    { 9, "I" },
+                    { 10, "J" },
+                    { 11, "K" },
+                    { 12, "L" },
+                    { 13, "M" },
+                    { 14, "N" },
+                    { 15, "O" },
+                    { 16, "P" },
+                    { 17, "Q" },
+                    { 18, "R" },
+                    { 19, "S" },
+                    { 20, "T" },
+                    { 21, "U" },
+                    { 22, "V" },
+                    { 23, "W" },
+                    { 24, "X" },
+                    { 25, "Y" },
+                    { 26, "Z" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Zones",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "PARKING" },
+                    { 2, "PATHWAYS" },
+                    { 3, "ACCESSIBLE_ENTERANCE" },
+                    { 4, "INTERIOR_ROUTES" },
+                    { 5, "VOTING_AREAS" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_QuestionId",
                 table: "Answers",
@@ -133,7 +239,8 @@ namespace quizapp.api.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Findings_AnswerId",
                 table: "Findings",
-                column: "AnswerId");
+                column: "AnswerId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QuestionSeverityId",
@@ -144,6 +251,16 @@ namespace quizapp.api.Migrations
                 name: "IX_Questions_QuestionTypeId",
                 table: "Questions",
                 column: "QuestionTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_SectionId",
+                table: "Questions",
+                column: "SectionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_ZoneId",
+                table: "Questions",
+                column: "ZoneId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Recommendations_AnswerId",
@@ -171,6 +288,12 @@ namespace quizapp.api.Migrations
 
             migrationBuilder.DropTable(
                 name: "QuestionTypes");
+
+            migrationBuilder.DropTable(
+                name: "Sections");
+
+            migrationBuilder.DropTable(
+                name: "Zones");
         }
     }
 }

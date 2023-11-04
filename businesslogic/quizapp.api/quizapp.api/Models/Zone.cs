@@ -1,8 +1,8 @@
 ﻿namespace quizapp.api.Models
 {
-    public class QuestionSeverity
+    public class Zone
     {
         public int Id { get; set; }
-        public int Severity { get; set; }
+        public string Name { get; set; }
     }
 }
