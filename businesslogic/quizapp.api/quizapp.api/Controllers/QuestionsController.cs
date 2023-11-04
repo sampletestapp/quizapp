@@ -39,7 +39,7 @@ namespace quizapp.api.Controllers
 
         // POST: api/questions
         [HttpPost]
-        public async Task<ActionResult<QuestionDto>> CreateQuestion(QuestionDto questionDto)
+        public async Task<ActionResult<QuestionDto>> CreateQuestion([FromBody]QuestionDto questionDto)
         {
             var createdQuestion = await _questionService.CreateQuestion(questionDto);
 

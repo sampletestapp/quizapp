@@ -9,6 +9,6 @@ namespace quizapp.api.Models
         public int QuestionId { get; set; }
         public Question Question { get; set; }
         public ICollection<Recommendation> Recommendations { get; set; }
-        public ICollection<Finding> Findings { get; set; }
+        public Finding Findings { get; set; }
     }
 }
