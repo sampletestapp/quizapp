@@ -90,7 +90,7 @@ $(document).ready(function () {
     e.preventDefault();
 
     var question = {
-      questionId: $("#questionId").val(),
+      questionNumber: $("#questionNumber").val(),
       text: $("#question").val(),
       questionTypeId: $("#questionType").val(),
       section: $("#section").val(),
