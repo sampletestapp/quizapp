@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Question</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="edit-screen">
+    <h2>Edit Question</h2>
+
+    <form id="editForm">
+        <label for="questionNumber">Question Number:</label>
+        <input type="text" id="questionNumber" name="questionNumber" readonly /><br />
+
+        <label for="questionText">Question Text:</label>
+        <input type="text" id="questionText" name="questionText" required /><br />
+
+        <label for="questionSeverity">Question Severity:</label>
+        <select id="questionSeverity" name="questionSeverity" required>
+            <!-- Populate question severity options as needed -->
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select><br />
+
+        <label for="section">Section:</label>
+        <select id="section" name="section" required>
+            <!-- Populate section options as needed -->
+        </select><br />
+
+        <label for="zones">Zones:</label>
+        <select id="zones" name="zones" required>
+            <!-- Populate zone options as needed -->
+            <option value="1">PARKING</option>
+            <option value="2">PATHWAYS</option>
+            <option value="3">ACCESSIBLE ENTRANCE</option>
+            <option value="4">INTERIOR ROUTES</option>
+            <option value="5">VOTING AREAS</option>
+        </select><br />
+
+        <label for="questionType">Question Type:</label>
+        <select id="questionType" name="questionType" required>
+            <!-- Populate question type options as needed -->
+            <option value="blank">Input</option>
+            <option value="singleSelection">Single Selection</option>
+            <option value="multipleChoiceSelection">Multiple Choice Selection</option>
+        </select><br />
+
+        <div id="answersContainer"></div>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <script>
+        // Code specific to the edit screen
+        $(document).ready(function () {
+            var sectionDropdown = $("#section");
+            for (var i = 1; i <= 26; i++) {
+                var letter = String.fromCharCode(64 + i); // Convert number to corresponding ASCII character
+                sectionDropdown.append(`<option value="${i}">${letter}</option>`);
+            }
+            // Retrieve question ID from the URL parameter (assuming you are passing it in the URL)
+            var questionId = getParameterByName('id');
+
+            // Make an AJAX request to get the question details by ID
+            $.ajax({
+                url: 'http://localhost:5253/api/Questions/' + questionId,  // Replace with your actual endpoint
+                type: 'GET',
+                success: function (question) {
+                    // Populate the edit screen with question details
+                    populateEditScreen(question);
+                },
+                error: function (error) {
+                    console.error('Error fetching question details', error);
+                }
+            });
+
+            // Function to populate the edit screen with question details
+            function populateEditScreen(question) {
+                // Populate your edit screen HTML elements with the question details
+                $('#questionNumber').val(question.questionNumber);
+                $('#questionText').val(question.text);
+                $('#questionSeverity').val(question.questionSeverityId);
+                $('#section').val(question.sectionId);
+                $('#zones').val(question.zoneId);
+                $('#questionType').val(getQuestionTypeText(question.questionTypeId));
+
+                // Display answers based on the question type
+                if (question.answers && question.answers.length > 0) {
+                    var html = '<ul>';
+                    question.answers.forEach(function (answer) {
+                        html += '<li>';
+                        html += '<strong>Answer:</strong> ' + answer.text + '<br>';
+
+                        // Display recommendations
+                        if (answer.recommendations && answer.recommendations.length > 0) {
+                            html += '<strong>Recommendations:</strong><ul>';
+                            answer.recommendations.forEach(function (recommendation) {
+                                html += '<li>' + recommendation.text + '</li>';
+                            });
+                            html += '</ul>';
+                        }
+
+                        // Display findings
+                        if (answer.findings && answer.findings.text) {
+                            html += '<strong>Findings:</strong> ' + answer.findings.text + '<br>';
+                        }
+
+                        html += '</li>';
+                    });
+                    html += '</ul>';
+                    $('#answersContainer').html(html);
+                }
+            }
+            // Function to get question type text based on the question type id
+            function getQuestionTypeText(questionTypeId) {
+                switch (questionTypeId) {
+                    case 1:
+                        return 'blank';
+                    case 2:
+                        return 'singleSelection';
+                    case 3:
+                        return 'multipleChoiceSelection';
+                    default:
+                        return 'Unknown';
+                }
+            }
+
+
+            // Function to get URL parameter by name
+            function getParameterByName(name) {
+                var url = window.location.href;
+                name = name.replace(/[\[\]]/g, '\\$&');
+                var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, ' '));
+            }
+        });
+    </script>
+</body>
+
+</html>
