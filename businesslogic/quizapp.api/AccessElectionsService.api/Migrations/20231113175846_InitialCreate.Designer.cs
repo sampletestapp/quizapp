@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccessElectionsService.api.Migrations
 {
     [DbContext(typeof(AccessElectionsDbContext))]
-    [Migration("20231113160049_InitialCreate")]
+    [Migration("20231113175846_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -59,15 +59,16 @@ namespace AccessElectionsService.api.Migrations
                     b.Property<int>("QuestionTypeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Section")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("SectionId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("QuestionSeverityId");
 
                     b.HasIndex("QuestionTypeId");
+
+                    b.HasIndex("SectionId");
 
                     b.ToTable("Questions");
                 });
@@ -80,10 +81,6 @@ namespace AccessElectionsService.api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AnswerText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
@@ -95,6 +92,10 @@ namespace AccessElectionsService.api.Migrations
 
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("QuestionAnswerText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
@@ -135,7 +136,8 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("QuestionAnswerId");
+                    b.HasIndex("QuestionAnswerId")
+                        .IsUnique();
 
                     b.ToTable("Findings");
                 });
@@ -496,9 +498,17 @@ namespace AccessElectionsService.api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AccessElectionsService.api.Models.Section", "Section")
+                        .WithMany()
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("QuestionSeverity");
 
                     b.Navigation("QuestionType");
+
+                    b.Navigation("Section");
                 });
 
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionAnswer", b =>
@@ -515,8 +525,8 @@ namespace AccessElectionsService.api.Migrations
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionAnswerFinding", b =>
                 {
                     b.HasOne("AccessElectionsService.api.Models.QuestionAnswer", "QuestionAnswer")
-                        .WithMany("Findings")
-                        .HasForeignKey("QuestionAnswerId")
+                        .WithOne("Findings")
+                        .HasForeignKey("AccessElectionsService.api.Models.QuestionAnswerFinding", "QuestionAnswerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -541,7 +551,8 @@ namespace AccessElectionsService.api.Migrations
 
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionAnswer", b =>
                 {
-                    b.Navigation("Findings");
+                    b.Navigation("Findings")
+                        .IsRequired();
 
                     b.Navigation("Recommendations");
                 });

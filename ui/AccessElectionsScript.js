@@ -117,13 +117,13 @@ $(document).ready(function () {
     };
 
     var answer = {
-      text: '',
+      questionAnswerText: '',
       recommendations: [],
       findings: ''
     };
 
     recomendation = {
-      text: ""
+      questionAnswerRecommendationText: ""
     }
 
     if (questionTypeValue === "blank") {
@@ -135,7 +135,7 @@ $(document).ready(function () {
         var recommendationText = $(this).val();
         // Create a recommendation object with the text
         var recommendation = {
-          QuestionAnswerRecommendationText: recommendationText
+          questionAnswerRecommendationText: recommendationText
         };
         // Add the recommendation to the list
         recommendationsList.push(recommendation);
@@ -144,7 +144,7 @@ $(document).ready(function () {
       answer.questionAnswerText = answerText;
       answer.recommendations= recommendationsList;
       answer.findings = {
-        QuestionAnswerFindingText: findings
+        questionAnswerFindingText: findings
       };
 
       questionDto.QuestionAnswers.push(answer);
@@ -168,7 +168,7 @@ $(document).ready(function () {
             var recommendationText = $(this).val();
             // Create a recommendation object with the text
             var recommendation = {
-              QuestionAnswerRecommendationText: recommendationText
+              questionAnswerRecommendationText: recommendationText
             };
             // Add the recommendation to the list
             recommendationsList.push(recommendation);
@@ -177,7 +177,7 @@ $(document).ready(function () {
           // Get associated findings
           var finding = $(`input.findings[data-answer-id="${answerId}"]`).val();
           answer.findings = {
-            QuestionAnswerFindingText: finding
+            questionAnswerFindingText: finding
           };
           answer.recommendations = recommendationsList;
           questionDto.QuestionAnswers.push(answer);

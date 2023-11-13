@@ -81,7 +81,7 @@ namespace AccessElectionsService.api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     QuestionText = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuestionNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Section = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SectionId = table.Column<int>(type: "int", nullable: false),
                     QuestionSeverityId = table.Column<int>(type: "int", nullable: false),
                     QuestionTypeId = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
@@ -104,6 +104,12 @@ namespace AccessElectionsService.api.Migrations
                         principalTable: "QuestionTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Questions_Sections_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "Sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -112,7 +118,7 @@ namespace AccessElectionsService.api.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QuestionAnswerText = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuestionId = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -251,7 +257,8 @@ namespace AccessElectionsService.api.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Findings_QuestionAnswerId",
                 table: "Findings",
-                column: "QuestionAnswerId");
+                column: "QuestionAnswerId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QuestionSeverityId",
@@ -262,6 +269,11 @@ namespace AccessElectionsService.api.Migrations
                 name: "IX_Questions_QuestionTypeId",
                 table: "Questions",
                 column: "QuestionTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_SectionId",
+                table: "Questions",
+                column: "SectionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Recommendations_QuestionAnswerId",
@@ -279,9 +291,6 @@ namespace AccessElectionsService.api.Migrations
                 name: "Recommendations");
 
             migrationBuilder.DropTable(
-                name: "Sections");
-
-            migrationBuilder.DropTable(
                 name: "Zones");
 
             migrationBuilder.DropTable(
@@ -295,6 +304,9 @@ namespace AccessElectionsService.api.Migrations
 
             migrationBuilder.DropTable(
                 name: "QuestionTypes");
+
+            migrationBuilder.DropTable(
+                name: "Sections");
         }
     }
 }
