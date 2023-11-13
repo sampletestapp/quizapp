@@ -5,3 +5,6 @@
 /businesslogic/quizapp.api/.vs
 /businesslogic/quizapp.api/quizapp.api/bin/Debug/net6.0
 /businesslogic/quizapp.api/quizapp.api/obj
+/businesslogic/quizapp.api/AccessElectionsService.api/bin/Debug/net6.0
+/businesslogic/quizapp.api/AccessElectionsService.api/obj
+/.vs
