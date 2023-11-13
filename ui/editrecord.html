@@ -109,12 +109,49 @@
                             html += '<strong>Findings:</strong> ' + answer.findings.text + '<br>';
                         }
 
+                        // Add button to add recommendations
+                        html += '<button class="addRecommendationBtn" data-answer-id="' + answer.id + '">Add Recommendation</button>';
+
+                        // Add container for recommendations
+                        html += '<div class="recommendationsContainer" id="recommendationsContainer_' + answer.id + '"></div>';
+
                         html += '</li>';
                     });
                     html += '</ul>';
                     $('#answersContainer').html(html);
+
+                    // Bind click event to add recommendation button
+                    $('.addRecommendationBtn').on('click', function () {
+                        var answerId = $(this).data('answer-id');
+                        addRecommendationField(answerId);
+                    });
                 }
             }
+
+            // Function to add a recommendation field dynamically
+            function addRecommendationField(answerId) {
+                var recommendationsContainer = $('#recommendationsContainer_' + answerId);
+                var recommendationId = Date.now();
+
+                recommendationsContainer.append(`
+        <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">
+        <button type="button" class="removeRecommendationBtn" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">Remove Recommendation</button>
+    `);
+
+                // Bind click event to remove recommendation button
+                $('.removeRecommendationBtn').on('click', function () {
+                    var answerId = $(this).data('answer-id');
+                    var recommendationId = $(this).data('recommendation-id');
+                    removeRecommendationField(answerId, recommendationId);
+                });
+            }
+
+            // Function to remove a recommendation field dynamically
+            function removeRecommendationField(answerId, recommendationId) {
+                $(`input.recommendations[data-answer-id="${answerId}"][data-recommendation-id="${recommendationId}"]`).remove();
+                $(`.removeRecommendationBtn[data-answer-id="${answerId}"][data-recommendation-id="${recommendationId}"]`).remove();
+            }
+
             // Function to get question type text based on the question type id
             function getQuestionTypeText(questionTypeId) {
                 switch (questionTypeId) {
