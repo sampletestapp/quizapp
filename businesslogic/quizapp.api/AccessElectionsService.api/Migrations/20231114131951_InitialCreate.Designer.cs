@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccessElectionsService.api.Migrations
 {
     [DbContext(typeof(AccessElectionsDbContext))]
-    [Migration("20231113175846_InitialCreate")]
+    [Migration("20231114131951_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -62,6 +62,9 @@ namespace AccessElectionsService.api.Migrations
                     b.Property<int>("SectionId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ZoneId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("QuestionSeverityId");
@@ -69,6 +72,8 @@ namespace AccessElectionsService.api.Migrations
                     b.HasIndex("QuestionTypeId");
 
                     b.HasIndex("SectionId");
+
+                    b.HasIndex("ZoneId");
 
                     b.ToTable("Questions");
                 });
@@ -504,11 +509,19 @@ namespace AccessElectionsService.api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AccessElectionsService.api.Models.Zone", "Zone")
+                        .WithMany()
+                        .HasForeignKey("ZoneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("QuestionSeverity");
 
                     b.Navigation("QuestionType");
 
                     b.Navigation("Section");
+
+                    b.Navigation("Zone");
                 });
 
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionAnswer", b =>

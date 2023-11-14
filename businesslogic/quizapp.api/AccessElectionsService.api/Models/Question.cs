@@ -12,6 +12,8 @@
         public int QuestionTypeId { get; set; }
         public QuestionType QuestionType { get; set; }
         public ICollection<QuestionAnswer> QuestionAnswers { get; set; }
+        public int ZoneId { get; set; }
+        public Zone Zone { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public int ModifiedBy { get; set; }

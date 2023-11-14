@@ -84,6 +84,7 @@ namespace AccessElectionsService.api.Migrations
                     SectionId = table.Column<int>(type: "int", nullable: false),
                     QuestionSeverityId = table.Column<int>(type: "int", nullable: false),
                     QuestionTypeId = table.Column<int>(type: "int", nullable: false),
+                    ZoneId = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<int>(type: "int", nullable: false),
@@ -108,6 +109,12 @@ namespace AccessElectionsService.api.Migrations
                         name: "FK_Questions_Sections_SectionId",
                         column: x => x.SectionId,
                         principalTable: "Sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Questions_Zones_ZoneId",
+                        column: x => x.ZoneId,
+                        principalTable: "Zones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -276,6 +283,11 @@ namespace AccessElectionsService.api.Migrations
                 column: "SectionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Questions_ZoneId",
+                table: "Questions",
+                column: "ZoneId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Recommendations_QuestionAnswerId",
                 table: "Recommendations",
                 column: "QuestionAnswerId");
@@ -291,9 +303,6 @@ namespace AccessElectionsService.api.Migrations
                 name: "Recommendations");
 
             migrationBuilder.DropTable(
-                name: "Zones");
-
-            migrationBuilder.DropTable(
                 name: "Answers");
 
             migrationBuilder.DropTable(
@@ -307,6 +316,9 @@ namespace AccessElectionsService.api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Sections");
+
+            migrationBuilder.DropTable(
+                name: "Zones");
         }
     }
 }
