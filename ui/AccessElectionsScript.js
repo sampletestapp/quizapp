@@ -164,7 +164,7 @@ $(document).ready(function () {
           // Initialize an empty array to hold the recommendations
           var recommendationsList = [];
           // Assuming you have multiple input elements with class "recommendations"
-          $("input.recommendations").each(function () {
+          $(`input.recommendations[data-answer-id="${answerId}"]`).each(function () {
             var recommendationText = $(this).val();
             // Create a recommendation object with the text
             var recommendation = {

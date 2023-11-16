@@ -118,7 +118,7 @@
                     if (Array.isArray(answer.recommendations)) {
                         // For "blank" type question with multiple recommendations
                         answerContainer.append(`
-                        <div class="answer" data-answer-id="${answer.answerId}">
+                        <div class="answer" data-answer-id="${answer.id}">
                             <label>Answer</label><br />
                             <input type="text" name="blankAnswer" value="${answer.questionAnswerText}" /><br />
                             <div class="recommendationsContainer">
@@ -258,11 +258,9 @@
                     data: JSON.stringify(questionDto),
                     success: function (result) {
                         console.log('Question created successfully', result);
-                        // Handle success here
                     },
                     error: function (error) {
                         console.error('Error creating question', error);
-                        // Handle error here
                     }
                 });
 
