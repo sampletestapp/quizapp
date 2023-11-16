@@ -209,7 +209,5 @@ $(document).ready(function () {
     $("#questionList").html(
       '<div class="questionList">' + JSON.stringify(questionDto) + "</div>"
     );
-    // Reset form after successful save
-    //$("#questionForm")[0].reset();
   });
 });

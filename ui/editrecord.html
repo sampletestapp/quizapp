@@ -123,11 +123,11 @@
                             <input type="text" name="blankAnswer" value="${answer.questionAnswerText}" /><br />
                             <div class="recommendationsContainer">
                                 <label for="recommendations">Recommendations:</label><br />
-                                ${generateRecommendationsInputs(answer.recommendations)}
+                                ${generateRecommendationsInputs(answer.id, answer.recommendations)}
                             </div>
                             <div class="findingsContainer">
                                 <label for="findings">Findings:</label>
-                                <input type="text" name="findings" class="findings" value="${answer.findings.questionAnswerFindingText}" />
+                                <input type="text" name="findings" class="findings" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingText}" />
                             </div>
                         </div>
                     `);
@@ -137,12 +137,12 @@
             }
 
 
-            function generateRecommendationsInputs(recommendations) {
+            function generateRecommendationsInputs(answerid, recommendations) {
                 let recommendationsHtml = '';
                 recommendations.forEach((recommendation, index) => {
                     recommendationsHtml += `
-                    <input type="text" name="recommendations" class="recommendations" value="${recommendation.questionAnswerRecommendationText}" data-recommendation-id="${index}">
-                    <button type="button" class="removeRecommendation" data-recommendation-id="${index}">❌Remove Recommendation</button><br />
+                    <input type="text" name="recommendations" class="recommendations" value="${recommendation.questionAnswerRecommendationText}" data-answer-id="${answerid}">
+                    <button type="button" class="removeRecommendation" data-answer-id="${answerid}">❌Remove Recommendation</button><br />
                 `;
                 });
                 return recommendationsHtml;
@@ -163,6 +163,9 @@
                 } else {
                     questionTypeId = 1;
                 }
+
+                // Now, questionTypeId will contain the appropriate integer value.
+
 
                 //questionDto Object
                 var questionDto = {
@@ -224,7 +227,7 @@
                             // Initialize an empty array to hold the recommendations
                             var recommendationsList = [];
                             // Assuming you have multiple input elements with class "recommendations"
-                            $("input.recommendations").each(function () {
+                            $(`input.recommendations[data-answer-id="${answerId}"]`).each(function () {
                                 var recommendationText = $(this).val();
                                 // Create a recommendation object with the text
                                 var recommendation = {
