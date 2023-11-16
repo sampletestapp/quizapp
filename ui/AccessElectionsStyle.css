@@ -43,11 +43,6 @@ button:hover {
   color: #fff;
 }
 
-/* Style for answer containers */
-.answer-container {
-  display: none;
-}
-
 /* Style for answer containers with specific IDs */
 #trueFalseAnswer,
 #blankAnswer,
