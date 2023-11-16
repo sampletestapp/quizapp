@@ -48,7 +48,49 @@ namespace AccessElectionsService.api.Services
             // Update properties of existingQuestion with values from questionDto
             existingQuestion.QuestionText = questionDto.QuestionText;
             existingQuestion.QuestionTypeId = questionDto.QuestionTypeId;
+            existingQuestion.QuestionText = questionDto.QuestionText;
+            existingQuestion.QuestionTypeId = questionDto.QuestionTypeId;
+            existingQuestion.QuestionNumber = questionDto.QuestionNumber;
+            existingQuestion.SectionId = questionDto.SectionId;
+            existingQuestion.QuestionSeverityId = questionDto.QuestionSeverityId;
+            existingQuestion.ZoneId = questionDto.ZoneId;
 
+            // Clear existing relationships and add new ones
+            existingQuestion.QuestionAnswers.Clear();
+
+            if (questionDto.QuestionAnswers != null)
+            {
+                foreach (var answerDto in questionDto.QuestionAnswers)
+                {
+                    var newAnswer = new QuestionAnswer
+                    {
+                        QuestionAnswerText = answerDto.QuestionAnswerText
+                    };
+
+                    // Add Recommendations
+                    if (answerDto.Recommendations != null)
+                    {
+                        newAnswer.Recommendations = answerDto.Recommendations
+                            .Select(r => new QuestionAnswerRecommendation
+                            {
+                                QuestionAnswerRecommendationText = r.QuestionAnswerRecommendationText
+                            })
+                            .ToList();
+                    }
+
+                    // Add Finding
+                    if (answerDto.Findings != null)
+                    {
+                        newAnswer.Findings = new QuestionAnswerFinding
+                        {
+                            QuestionAnswerFindingText = answerDto.Findings.QuestionAnswerFindingText
+                        };
+                    }
+
+                    existingQuestion.QuestionAnswers.Add(newAnswer);
+                }
+            }
+            // Save the changes to the repository as needed
             await _questionRepository.UpdateQuestion(existingQuestion);
         }
 
