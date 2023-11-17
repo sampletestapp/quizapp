@@ -136,15 +136,32 @@
                 });
             }
 
+            $(document).on("click", ".addRecommendation", function () {
+                var answerId = $(this).data("answer-id");
+                var recommendationId = Date.now(); // Generate a unique ID for the recommendation
+                $(this).before(`
+                    <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">
+                    <button type="button" class="removeRecommendation" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button>
+                `);
+            });
+
+            $(document).on("click", ".removeRecommendation", function () {
+                var answerId = $(this).data("answer-id");
+                var recommendationId = $(this).data("recommendation-id");
+                $(`input.recommendations[data-answer-id="${answerId}"][data-recommendation-id="${recommendationId}"]`).remove();
+                $(this).remove();
+            });
 
             function generateRecommendationsInputs(answerid, recommendations) {
                 let recommendationsHtml = '';
                 recommendations.forEach((recommendation, index) => {
+                    var recommendationId = Date.now()+index;
                     recommendationsHtml += `
-                    <input type="text" name="recommendations" class="recommendations" value="${recommendation.questionAnswerRecommendationText}" data-answer-id="${answerid}">
-                    <button type="button" class="removeRecommendation" data-answer-id="${answerid}">❌Remove Recommendation</button><br />
+                    <input type="text" name="recommendations" class="recommendations" value="${recommendation.questionAnswerRecommendationText}" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">
+                    <button type="button" class="removeRecommendation" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button><br />
                 `;
                 });
+                recommendationsHtml += `<button type="button" class="addRecommendation">Add Recommendation</button>`;
                 return recommendationsHtml;
             }
 
@@ -247,12 +264,6 @@
                         }
                     });
                 }
-
-                // Remove empty recommendation and finding arrays
-                questionDto.QuestionAnswers = questionDto.QuestionAnswers.filter(
-                    (answer) =>
-                        answer.recommendations.length > 0 || answer.findings > 0
-                );
 
                 $.ajax({
                     url: 'http://localhost:5253/api/Questions/' + questionId,  // Replace with your actual endpoint

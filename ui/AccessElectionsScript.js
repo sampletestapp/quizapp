@@ -185,12 +185,6 @@ $(document).ready(function () {
       });
     }
 
-    // Remove empty recommendation and finding arrays
-    questionDto.QuestionAnswers = questionDto.QuestionAnswers.filter(
-      (answer) =>
-        answer.recommendations.length > 0 || answer.findings > 0
-    );
-
     $.ajax({
       url: 'http://localhost:5253/api/Questions',  // Replace with your actual endpoint
       type: 'POST',
