@@ -111,6 +111,7 @@
             function populateExistingAnswers(answers) {
                 // Clear existing answers
                 $("#existingAnswers").empty();
+                var selectedType = $("#questionType").val();
 
                 answers.forEach(function (answer) {
                     var answerContainer = $("<div class='answer-container'></div>");
@@ -130,11 +131,39 @@
                                 <input type="text" name="findings" class="findings" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingText}" />
                             </div>
                         </div>
+                        <button type="button" class="removeAnswer">❌Remove Answer</button>
                     `);
                     }
                     $("#existingAnswers").append(answerContainer);
                 });
+                $("#existingAnswers").append(`<button type="button" class="addAnswer" data-type="${selectedType}">Add Answer</button>`);
             }
+
+            $(document).on("click", ".addAnswer", function () {
+                var type = $(this).data("type");
+                var answerId = Date.now(); // Generate a unique ID for the answer
+
+                $("#existingAnswers").append(`
+                    <div class="answer" data-answer-id="${answerId}">
+                        <input type="text" name="${type}Answer">
+                        <div class="recomendationsContainer">
+                            <label for="recommendations">Recommendations:</label>
+                            <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}">
+                            <button type="button" class="addRecommendation" data-answer-id="${answerId}">Add Recommendation</button>
+                        </div>
+                        <div class="rfindingsContainer">
+                            <label for="findings">Findings:</label>
+                            <input type="text" name="findings" class="findings" data-answer-id="${answerId}">
+                        </div>
+                        <button type="button" class="removeAnswer">❌Remove Answer</button>
+                    </div>
+                `);
+            });
+
+            $(document).on("click", ".removeAnswer", function () {
+                $(this).parent().remove();
+            });
+
 
             $(document).on("click", ".addRecommendation", function () {
                 var answerId = $(this).data("answer-id");
@@ -155,7 +184,7 @@
             function generateRecommendationsInputs(answerid, recommendations) {
                 let recommendationsHtml = '';
                 recommendations.forEach((recommendation, index) => {
-                    var recommendationId = Date.now()+index;
+                    var recommendationId = Date.now() + index;
                     recommendationsHtml += `
                     <input type="text" name="recommendations" class="recommendations" value="${recommendation.questionAnswerRecommendationText}" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">
                     <button type="button" class="removeRecommendation" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button><br />
@@ -180,9 +209,6 @@
                 } else {
                     questionTypeId = 1;
                 }
-
-                // Now, questionTypeId will contain the appropriate integer value.
-
 
                 //questionDto Object
                 var questionDto = {
