@@ -50,6 +50,7 @@ namespace AccessElectionsService.api.Services
             existingQuestion.QuestionTypeId = questionDto.QuestionTypeId;
             existingQuestion.QuestionText = questionDto.QuestionText;
             existingQuestion.QuestionTypeId = questionDto.QuestionTypeId;
+            existingQuestion.IsActive = questionDto.IsActive;
             existingQuestion.QuestionNumber = questionDto.QuestionNumber;
             existingQuestion.SectionId = questionDto.SectionId;
             existingQuestion.QuestionSeverityId = questionDto.QuestionSeverityId;

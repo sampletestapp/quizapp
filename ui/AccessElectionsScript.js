@@ -110,6 +110,7 @@ $(document).ready(function () {
       QuestionText: $("#question").val(),
       QuestionTypeId: questionTypeId,  // An integer value
       QuestionNumber: $("#questionNumber").val(),
+      IsActive:  $("#isActive").prop("checked"),
       SectionId: parseInt($("#section").val()),
       ZoneId: parseInt($("#zones").val()),
       QuestionSeverityId: parseInt($("#questionSeverity").val()), // An integer value

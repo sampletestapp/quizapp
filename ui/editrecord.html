@@ -26,6 +26,9 @@
                 <option value="2">2</option>
                 <option value="3">3</option>
             </select><br />
+             <!-- Is Active -->
+             <label for="isActive">Is Active:</label>
+             <input type="checkbox" id="isActive"><br/><br/>
             <!-- Section -->
             <label for="section">Section:</label>
             <select id="section" name="section" required></select><br />
@@ -78,6 +81,7 @@
                     $("#question").val(questionDetails.questionText);
                     $("#questionSeverity").val(questionDetails.questionSeverityId);
                     $("#section").val(questionDetails.sectionId);
+                    $("#isActive").prop("checked", questionDetails.isActive);
                     $("#zones").val(questionDetails.zoneId);
                     $("#questionType").val(getQuestionTypeText(questionDetails.questionTypeId));
 
@@ -86,7 +90,6 @@
                 },
                 error: function (error) {
                     console.error('Error fetching question details', error);
-                    // Handle error here
                 }
             });
 
@@ -108,14 +111,41 @@
                 }
             }
 
+            $("#questionType").change(function () {
+                var selectedType = $("#questionType").val();
+                $("#existingAnswers").empty();
+
+                var answerContainer = $("<div class='answer-container'></div>");
+                if (selectedType === "blank") {
+                    // For "blank" type question with multiple recommendations
+                    answerContainer.append(`
+                        <div class="answer" id="blankAnswer">
+                        <label>Answer</label><br />
+                        <input type="text" name="blankAnswer" /><br />
+                        <div class="recomendationsContainer">
+                            <label for="recommendations">Recommendations:</label>
+                            <input type="text" name="recommendations" class="recommendations">
+                            <button type="button" class="addRecommendation">Add Recommendation</button>
+                        </div>
+                        <div class="rfindingsContainer">
+                            <label for="findings">Findings:</label>
+                            <input type="text" name="findings" class="findings">
+                        </div>
+                    </div>
+                    `);
+                }
+                $("#existingAnswers").append(answerContainer);
+                if (selectedType != "blank") {
+                    $("#existingAnswers").append(`<button type="button" class="addAnswer" data-type="${selectedType}">Add Answer</button>`)
+                }
+            });
+
             function populateExistingAnswers(answers) {
                 // Clear existing answers
                 $("#existingAnswers").empty();
                 var selectedType = $("#questionType").val();
-
+                var answerContainer = $("<div class='answer-container'></div>");
                 answers.forEach(function (answer) {
-                    var answerContainer = $("<div class='answer-container'></div>");
-
                     if (Array.isArray(answer.recommendations)) {
                         // For "blank" type question with multiple recommendations
                         answerContainer.append(`
@@ -131,20 +161,25 @@
                                 <input type="text" name="findings" class="findings" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingText}" />
                             </div>
                         </div>
-                        <button type="button" class="removeAnswer">❌Remove Answer</button>
+                        
                     `);
+                    if (selectedType != "blank") {
+                        answerContainer.append(`<button type="button" class="removeAnswer">❌Remove Answer</button>`);
                     }
-                    $("#existingAnswers").append(answerContainer);
+                    }
                 });
-                $("#existingAnswers").append(`<button type="button" class="addAnswer" data-type="${selectedType}">Add Answer</button>`);
+                $("#existingAnswers").append(answerContainer);
+                if (selectedType != "blank") {
+                    $("#existingAnswers").append(`<button type="button" class="addAnswer" data-type="${selectedType}">Add Answer</button>`);
+                }
             }
 
             $(document).on("click", ".addAnswer", function () {
                 var type = $(this).data("type");
                 var answerId = Date.now(); // Generate a unique ID for the answer
-
-                $("#existingAnswers").append(`
+                $(".answer-container").append(`
                     <div class="answer" data-answer-id="${answerId}">
+                        <label>Answer</label><br />
                         <input type="text" name="${type}Answer">
                         <div class="recomendationsContainer">
                             <label for="recommendations">Recommendations:</label>
@@ -217,6 +252,7 @@
                     QuestionTypeId: questionTypeId,  // An integer value
                     QuestionNumber: $("#questionNumber").val(),
                     SectionId: parseInt($("#section").val()),
+                    IsActive:  $("#isActive").prop("checked"),
                     ZoneId: parseInt($("#zones").val()),
                     QuestionSeverityId: parseInt($("#questionSeverity").val()), // An integer value
                     QuestionAnswers: []  // An empty array or provide answers if needed

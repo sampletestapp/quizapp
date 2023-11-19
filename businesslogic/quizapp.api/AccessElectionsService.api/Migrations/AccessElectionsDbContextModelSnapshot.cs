@@ -36,6 +36,9 @@ namespace AccessElectionsService.api.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ModifiedBy")
                         .HasColumnType("int");
 

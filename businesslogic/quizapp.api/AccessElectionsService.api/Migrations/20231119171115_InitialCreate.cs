@@ -80,6 +80,7 @@ namespace AccessElectionsService.api.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     QuestionText = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     QuestionNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SectionId = table.Column<int>(type: "int", nullable: false),
                     QuestionSeverityId = table.Column<int>(type: "int", nullable: false),
