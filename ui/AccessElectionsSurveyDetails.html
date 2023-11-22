@@ -1,0 +1,193 @@
+<html>
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link href="/WebResources/edm_css/jqueryui.css" rel="Stylesheet">
+    <link href="/WebResources/edm_css/grid.css" rel="Stylesheet">
+    <!--    <link href="/WebResources/edm_css/ui.jqgrid_custom.css" rel="Stylesheet">-->
+    <script src="/WebResources/edm_js/lib/jquery_3.3.1.min.js" type="text/javascript" language="javascript"></script>
+    <script src="/WebResources/edm_js/lib/jquery_ui_1.10.4.min.js" type="text/javascript" language="javascript"></script>
+    <script src="/WebResources/edm_js/lib/Grid.js" type="text/javascript" language="javascript"></script>
+    <!--    <script src="/WebResources/edm_js/jspdf.min.js" type="text/javascript" language="javascript"></script>-->
+    <script src="/WebResources/edm_js/lib/SDK.REST.js" type="text/javascript"></script>
+    <script src="../ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <script src="/WebResources/edm_js/lib/CrmFetchKit.js" type="text/javascript"></script>
+    <script src="/WebResources/edm_js/CommonOperations.js" type="text/javascript" language="javascript"></script>
+    <script src="/WebResources/edm_js/KnowledgeArticle.js" type="text/javascript"></script>
+</head>
+<body>
+    <style type="text/css">
+        a:hover {
+            cursor: pointer;
+            color:blue;
+        }
+        a{
+            text-decoration: underline;
+            color:blue;
+        }
+        div.container {
+          width: 98%;
+          border: 2px solid grey;
+          padding: 0px 0px 0px 16px;
+        }
+       .rcorners2 {
+          border-radius: 25px;
+          border: 2px solid #73AD21;
+          padding: 20px; 
+          width: 200px;
+        }
+       .ui-th-column-header
+        {
+          text-align: left;
+        }
+        .ui-jqgrid tr.jqgrow td {font-size:0.9em}
+        
+        .center {
+        margin-left: auto;
+        margin-right: auto;
+        }
+    </style>
+    
+    <div class="container rcorners2">
+    <header><h1 align="center"><span id="title" style="font-family: Archivo Black,sans-serif; font-size: 2rem; margin-bottom:1rem; border:1px">Accessibility Audit Report and Plan of Action Form</span></br></h1></header>
+        <h2 align="center"><span style="font-weight: bold; align:center">Onsite Accessibility Compliance Review Conducted</span></h2><div id="date"></div></br>
+        &nbsp;<span align="right">
+            <div id="SurveyDetailsList">
+                <table class="right" id="gridSurveyDetailsList"></table>
+                <div id="gridSurveyDetails_pager"></div>
+            </div>
+        </span>
+        </br>
+    </div>
+  </body>
+</html>
+
+
+
+<script>
+    var gridArrayData = [];
+    $(document).ready(function () {
+      
+        displayinGrid();
+    });
+
+    function displayinGrid(){
+        
+        gridArrayData = [
+      {
+          "Question": "Q101",
+          "QuestionText": "Question 101",
+          "Response": "Answer",
+          "Finding": "Finding",
+        }, 
+      {
+          "Question": "Q102",
+          "QuestionText": "Question 102",
+          "Response": "Answer",
+          "Finding": "Finding",
+        },
+      {
+          "Question": "Q103",
+          "QuestionText": "Question 103",
+          "Response": "Answer",
+          "Finding": "Finding",
+        },
+      {
+          "Question": "Q104",
+          "QuestionText": "Question 104",
+          "Response": "Answer",
+          "Finding": "Finding",
+        },
+      {
+          "Question": "Q105",
+          "QuestionText": "Question 105",
+          "Response": "Answer",
+          "Finding": "Finding",
+        },
+      {
+          "Question": "Q106",
+          "QuestionText": "Question 106",
+          "Response": "Answer",
+          "Finding": "Finding",
+        },
+      {
+          "Question": "Q107",
+          "QuestionText": "Question 107",
+          "Response": "Answer",
+          "Finding": "Finding",
+        }
+      ]
+        
+        
+        $("#gridSurveyDetailsList").jqGrid({
+            colNames: ['Question', 'Question Text', 'Response', 'Finding'],
+            colModel: [
+                {
+                    label: 'Question', name: 'Question',  align: 'center', width: 80
+                },
+                {
+                    label: 'Question Text', name: 'QuestionText', align: 'center', width: 200
+                },
+                {
+                    label: 'Response', name: 'Response', align: 'center', width: 200
+                },
+                {
+                    label: 'Finding', name: 'Finding', align: 'center', width: 200
+                }
+            ],
+            autoencode: true,
+            height: 'auto',
+            maxheight: 1500,
+            width: 1500,
+            autowidth: false,
+            datatype: 'local',
+            viewrecords: true,
+            sortname:"ElectionDate",
+            sortorder: "desc",
+            loadtext: "Loading...",
+            pager: "#gridSurveyDetailspager",
+            rowNum: 5,
+            rowList: [25, 50, 75, 100, 125, 150, 175, 200]
+        });
+
+        $('#gridSurveyDetailsList').jqGrid('clearGridData');
+        $("#gridSurveyDetailsList").jqGrid('setGridParam', { data: gridArrayData });
+        // hide the show message
+        $("#gridSurveyDetailsList")[0].grid.endReq();
+        // refresh the grid
+        $("#gridSurveyDetailsList").trigger('reloadGrid');
+        $("#gridSurveyDetailsList").focus();
+
+        
+        
+        
+        
+        $('#gridSurveyDetailsList').jqGrid('clearGridData');
+        $("#gridSurveyDetailsList").jqGrid('setGridParam', { data: gridArrayData });
+        // hide the show message
+        $("#gridSurveyDetailsList")[0].grid.endReq();
+        // refresh the grid
+        $("#gridSurveyDetailsList").trigger('reloadGrid');
+        $("#gridSurveyDetailsList").focus();
+
+        //$("#gridSurveyMatrix").jqGrid('filterToolbar', { stringResult: true, searchOnEnter: true, defaultSearch: "cn", searchOperators: true });
+        
+        $("#gridSurveyDetailsList").jqGrid('navGrid','#gridSurveyMatrix',
+        {
+            edit:false, edittitle: "", width: 500,
+            add:false, addtitle: "", width: 500,
+            del:false,
+            view:false
+        });
+        $("#gridSurveyDetailsList").jqGrid('clearGridData');
+        $("#gridSurveyDetailsList").jqGrid('setGridParam',
+		{
+			data: gridArrayData
+		});
+        $("#gridSurveyDetailsList").trigger('reloadGrid');
+		$("#gridSurveyDetailsList").focus();
+        
+    }
+</script>
+
+

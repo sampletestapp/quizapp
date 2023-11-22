@@ -1,0 +1,236 @@
+﻿﻿ <title>Questions List</title>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE">
+<meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+
+<link href="/_common/styles/fonts.css.aspx?lcid=1033" rel="Stylesheet">
+<link href="/WebResources/edm_css/jqueryui.css" rel="Stylesheet">
+<link href="/WebResources/edm_css/grid.css" rel="Stylesheet">
+<link rel="stylesheet" href="/WebResources/edm_css/AccessElectionsStyle.css">
+
+<script src="../ClientGlobalContext.js.aspx" type="text/javascript"></script>
+<script src="/_static/_common/scripts/jquery1.7.2.min.js" type="text/javascript"></script>
+
+<script src="/WebResources/edm_js/lib/jquery_3.3.1.min.js" type="text/javascript" language="javascript"></script>
+<script src="/WebResources/edm_js/lib/jquery_ui_1.10.4.min.js" type="text/javascript" language="javascript"></script>
+<script src="/WebResources/edm_js/lib/Grid.js" type="text/javascript" language="javascript"></script>
+<script src="/WebResources/edm_js/lib/SDK.REST.js" type="text/javascript" language="javascript"></script>
+<script src="/WebResources/edm_js/lib/CrmFetchKit.js" type="text/javascript" language="javascript"></script>
+<script src="/WebResources/edm_js/CommonOperations.js" type="text/javascript" language="javascript"></script>
+<style type="text/css">
+
+    /* set the size of the datepicker search control for Order Date*/
+    #ui-datepicker-div {
+        font-size: 11px;
+    }
+
+    /* set the size of the autocomplete search control*/
+    .ui-menu-item {
+        font-size: 11px;
+    }
+
+    .ui-autocomplete {
+        font-size: 11px;
+    }
+
+    .ui-jqgrid tr.jqgrow td {
+        font-size: 0.9em
+    }
+
+    .areaTitle {
+        cursor: default;
+        font-family: Segoe UI;
+        font-size: 20px;
+        color: #505050;
+        padding: 2px 0px 2px 0px;
+        vertical-align: top;
+        text-align: left;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    h2 {
+        display: block;
+        font-size: 1.5em;
+        margin-block-start: 0.83em;
+        margin-block-end: 0.83em;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+        font-weight: bold;
+    }
+</style>
+<script type="text/javascript">
+    var gridArrayData = [];
+    function poponload()
+    {
+        testwindow = window.open("", "mywindow", "location=1,status=1,scrollbars=1,width='40%',height='40%'");
+        testwindow.moveTo(0, 0);
+    }
+
+    function popupWindow(url) {
+        let w=800
+        let h=750
+        const y = window.top.outerHeight / 2 + window.top.screenY - ( w / 2);
+        const x = window.top.outerWidth / 2 + window.top.screenX - ( h / 2);
+    
+    return window.open(url, 'test', `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${w}, height=${h}, top=${y}, left=${x}`);
+
+   }
+   
+   window.onunload = function(){
+    window.opener.location.reload();
+    };
+    
+    $(document).ready(function () {
+        //LoadQuestionMatrix();
+        
+        $.ajax({
+                url: 'http://localhost:5253/api/Questions',  // Replace with your actual endpoint
+                type: 'GET',
+                success: function (questions) {
+                    // Display questions using DataTables
+                    displayQuestions(questions);
+                },
+                error: function (error) {
+                    console.error('Error fetching questions', error);
+                }
+            });
+        });
+
+
+    function displayQuestions(questions) {
+     
+     
+      for (var i = 0; i < questions.length; i++) {
+            gridArrayData.push({
+                Id:questions[i].id,
+                QuestionNumber: questions[i].questionNumber,
+                QuestionText: questions[i].questionText,
+                Zone: mapZone(questions[i].zoneId)
+            });
+        }
+        displayinGrid();
+     }
+
+     
+     function mapZone(zoneId) {
+        var zoneText = ""; 
+        switch (zoneId) { 
+            case (zoneId = 1):
+                zoneText = "PARKING";
+                break;
+            case (zoneId = 2):
+                zoneText = "PATHWAYS";
+                break;
+            case (zoneId = 3):
+                zoneText = "ACCESSIBLE ENTERANCE";
+                break;
+            case (zoneId = 4):
+                zoneText = "INTERIOR ROUTES";
+                break;
+            case (zoneId = 5):
+                zoneText = "VOTING AREA";
+                break;
+           }
+           return zoneText;
+        }
+     
+        function displayinGrid(){
+        
+        $("#gridQuestionMatrix").jqGrid({
+            colNames: ['','Zone', 'QuestionNumber', 'QuestionText'],
+            colModel: [
+                {
+                    label: 'id', name: 'id', key: true, hidden: true
+                },
+                {
+                    label: 'Zone', name: 'Zone', align: 'left', width: 30,
+                    stype: "select",
+                    searchoptions: { value: ":[All];Parking:Parking;Pathways:Pathways;Accessible Entrance:Accessible Entrance;Interior Routes:Interior Routes;Voting Area:Voting Area" }
+                },
+                {
+                    label: 'Question#', name: 'QuestionNumber', align: 'left', width: 18,
+                    
+                    searchoptions: {
+                        // show search options
+                        sopt: ["ge", "le", "eq"] // ge = greater or equal to, le = less or equal to, eq = equal to
+                    }
+                },
+                {
+                    label: 'Question Description', name: 'QuestionText', align: 'left',
+                }
+            ],
+            autoencode: true,
+            height: 'auto',
+            maxheight: 1500,
+            width: 1500,
+            autowidth: false,
+            datatype: 'local',
+            viewrecords: true,
+            sortorder: "desc",
+            loadtext: "Loading...",
+            pager: "#gridQuestionMatrixpager",
+            rowNum: 25,
+            rowList: [25, 50, 75, 100, 125, 150, 175, 200],
+            ondblClickRow: function (Id) {
+                var win = popupWindow('/WebResources/edm_html/AccessElectionsQuestionEdit.html?Data='+encodeURIComponent(Id));
+            }
+        });
+
+        $('#gridQuestionMatrix').jqGrid('clearGridData');
+        $("#gridQuestionMatrix").jqGrid('setGridParam', { data: gridArrayData });
+        // hide the show message
+        $("#gridQuestionMatrix")[0].grid.endReq();
+        
+        
+        
+        
+        
+        $('#gridQuestionMatrix').jqGrid('clearGridData');
+        $("#gridQuestionMatrix").jqGrid('setGridParam', { data: gridArrayData });
+        // hide the show message
+        $("#gridQuestionMatrix")[0].grid.endReq();
+        // refresh the grid
+        $("#gridQuestionMatrix").trigger('reloadGrid');
+        $("#gridQuestionMatrix").focus();
+
+        $("#gridQuestionMatrix").jqGrid('filterToolbar', { stringResult: true, searchOnEnter: true, defaultSearch: "cn", searchOperators: true });
+        //$("#gridQuestionMatrix").jqGrid("navGrid", "#gridQuestionMatrixPager", {edit: false, add: false, del: false, refreshstate: "current"});
+        
+        $("#gridQuestionMatrix").jqGrid('navGrid','#gridQuestionMatrixPager',
+        {
+            edit:false, edittitle: "", width: 500,
+            add:false, addtitle: "", width: 500,
+            del:false,
+            view:false
+        });
+        $("#gridQuestionMatrix").jqGrid('clearGridData');
+        $("#gridQuestionMatrix").jqGrid('setGridParam',
+		{
+			data: gridArrayData
+		});
+        $("#gridQuestionMatrix").trigger('reloadGrid');
+		$("#gridQuestionMatrix").focus();
+        
+    }
+       
+</script>
+
+<html>
+<head>
+    <meta>
+    <meta>
+    <meta>
+</head>
+<body style="overflow-wrap: break-word;">
+    <label style="font-size: xx-large;"><b>Access Elections Question Matrix</b></label>
+    <div id="QuestionMatrix">
+        <table id="gridQuestionMatrix"></table>
+        <div id="gridQuestionMatrixPager"></div>
+        </br>
+        <div><Button style="addQuestion" onClick="popupWindow('/WebResources/edm_html/AccessElectionsQuestion.html')";" id="NewQuestion">Create New Question</Button></div>
+</button>
+    </div>
+</body>
