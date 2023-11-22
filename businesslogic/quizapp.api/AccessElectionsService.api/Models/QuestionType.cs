@@ -2,6 +2,7 @@
 
 namespace AccessElectionsService.api.Models
 {
+    [Table("QuestionType", Schema = "AE")]
     public class QuestionType
     {
         public int Id { get; set; }

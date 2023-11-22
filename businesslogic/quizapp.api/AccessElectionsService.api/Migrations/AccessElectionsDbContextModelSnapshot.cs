@@ -75,7 +75,7 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasIndex("ZoneId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Question", "AE");
                 });
 
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionAnswer", b =>
@@ -109,7 +109,7 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answers");
+                    b.ToTable("QuestionAnswer", "AE");
                 });
 
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionAnswerFinding", b =>
@@ -144,7 +144,7 @@ namespace AccessElectionsService.api.Migrations
                     b.HasIndex("QuestionAnswerId")
                         .IsUnique();
 
-                    b.ToTable("Findings");
+                    b.ToTable("QuestionAnswerFinding", "AE");
                 });
 
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionAnswerRecommendation", b =>
@@ -178,7 +178,7 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasIndex("QuestionAnswerId");
 
-                    b.ToTable("Recommendations");
+                    b.ToTable("QuestionAnswerRecommendation", "AE");
                 });
 
             modelBuilder.Entity("AccessElectionsService.api.Models.QuestionSeverity", b =>
@@ -206,7 +206,7 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QuestionSeverities");
+                    b.ToTable("QuestionSeverity", "AE");
 
                     b.HasData(
                         new
@@ -264,7 +264,7 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QuestionTypes");
+                    b.ToTable("QuestionType", "AE");
 
                     b.HasData(
                         new
@@ -310,7 +310,7 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Section", "AE");
 
                     b.HasData(
                         new
@@ -459,7 +459,7 @@ namespace AccessElectionsService.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Zones");
+                    b.ToTable("Zone", "AE");
 
                     b.HasData(
                         new

@@ -1,5 +1,9 @@
-﻿namespace AccessElectionsService.api.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AccessElectionsService.api.Models
 {
+
+    [Table("Zone", Schema = "AE")]
     public class Zone
     {
         public int Id { get; set; }

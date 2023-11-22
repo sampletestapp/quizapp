@@ -8,3 +8,7 @@
 /businesslogic/quizapp.api/AccessElectionsService.api/bin/Debug/net6.0
 /businesslogic/quizapp.api/AccessElectionsService.api/obj
 /.vs
+/businesslogic/quizapp.api/AccessElectionsService.api/Migrations/20231119171115_InitialCreate.cs
+/businesslogic/quizapp.api/AccessElectionsService.api/Migrations/20231119171115_InitialCreate.Designer.cs
+/businesslogic/quizapp.api/AccessElectionsService.api/Migrations/20231122012553_InitialCreate.cs
+/businesslogic/quizapp.api/AccessElectionsService.api/Migrations/20231122012553_InitialCreate.Designer.cs

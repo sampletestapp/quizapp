@@ -1,5 +1,8 @@
-﻿namespace AccessElectionsService.api.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AccessElectionsService.api.Models
 {
+    [Table("QuestionSeverity", Schema = "AE")]
     public class QuestionSeverity
     {
         public int Id { get; set; }

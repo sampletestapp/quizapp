@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Question</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="AccessElectionsStyle.css">
+</head>
+
+<body>
+    <div class="questionnaire-container">
+        <form class="questionnaire-form" id="questionForm">
+            <!-- Question Id (hidden) -->
+            <input type="hidden" id="questionId" name="questionId" />
+            <!-- Question Number -->
+            <label for="questionNumber">Question Number:</label>
+            <input type="text" id="questionNumber" name="questionNumber" required /><br />
+            <!-- Question -->
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" required /><br />
+            <!-- Question Severity -->
+            <label for="questionSeverity">Question Severity</label>
+            <select id="questionSeverity" name="questionSeverity" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select><br />
+            <!-- Section -->
+            <label for="section">Section:</label>
+            <select id="section" name="section" required></select><br />
+            <!-- Zones -->
+            <label for="zones">Zones</label>
+            <select id="zones" name="zones">
+                <option value="1">PARKING</option>
+                <option value="2">PATHWAYS</option>
+                <option value="3">ACCESSIBLE ENTRANCE</option>
+                <option value="4">INTERIOR ROUTES</option>
+                <option value="5">VOTING AREAS</option>
+            </select>
+            <!-- Question Type -->
+            <label for="questionType">Question Type</label>
+            <select id="questionType" name="questionType" required>
+                <option value="blank">Input</option>
+                <option value="singleSelection">Single Selection</option>
+                <option value="multipleChoiceSelection">Multiple Choice Selection</option>
+            </select>
+
+            <!-- Existing Answers Container -->
+            <div id="existingAnswers"></div>
+
+            <button type="submit">Update Question</button>
+        </form>
+
+        <div class="questionnaire-display">
+            <h2>Questions</h2>
+            <div id="questionList"></div>
+        </div>
+    </div>
+    <script src="AccessElectionsScript.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Assume you have a way to get the question ID from the "get records" screen
+            var questionId = getQuestionId(); 
+
+            // Fetch question details and populate the form
+            $.ajax({
+                url: 'http://localhost:5253/api/Questions/' + questionId,  
+                type: 'GET',
+                success: function (questionDetails) {
+                    // Populate form fields with question details
+                    $("#questionId").val(questionDetails.Id);
+                    $("#questionNumber").val(questionDetails.questionNumber);
+                    $("#question").val(questionDetails.questionText);
+                    $("#questionSeverity").val(questionDetails.questionSeverityId);
+                    $("#section").val(questionDetails.sectionId);
+                    $("#zones").val(questionDetails.zoneId);
+                    $("#questionType").val(getQuestionTypeText(questionDetails.questionTypeId));
+
+                    // Populate existing answers
+                    populateExistingAnswers(questionDetails.questionAnswers);
+                },
+                error: function (error) {
+                    console.error('Error fetching question details', error);
+                    // Handle error here
+                }
+            });
+            
+            function getQuestionId() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('id');
+            }
+
+            function getQuestionTypeText(questionTypeId) {
+                switch (questionTypeId) {
+                    case 1:
+                        return 'blank';
+                    case 2:
+                        return 'singleSelection';
+                    case 3:
+                        return 'multipleChoiceSelection';
+                    default:
+                        return 'Unknown';
+                }
+            }
+
+            function populateExistingAnswers(answers) {
+                // Clear existing answers
+                $("#existingAnswers").empty();
+
+                answers.forEach(function (answer) {
+                    var answerContainer = $("<div class='answer-container'></div>");
+
+                    if (answer.questionAnswerText !== undefined) {
+                        // For "blank" type question
+                        answerContainer.append(`
+                            <div class="answer" data-answer-id="${answer.answerId}">
+                                <label>Answer</label><br />
+                                <input type="text" name="blankAnswer" value="${answer.questionAnswerText}" /><br />
+                                <div class="recomendationsContainer">
+                                    <label for="recommendations">Recommendations:</label>
+                                    <input type="text" name="recommendations" class="recommendations" value="${answer.recommendations}" />
+                                </div>
+                                <div class="rfindingsContainer">
+                                    <label for="findings">Findings:</label>
+                                    <input type="text" name="findings" class="findings" value="${answer.findings}" />
+                                </div>
+                            </div>
+                        `);
+                    } else {
+                        // For other types of questions
+                        answerContainer.append(`
+                            <div class="answer" data-answer-id="${answer.answerId}">
+                                <input type="text" name="${answer.questionType}Answer" value="${answer.questionAnswerText}">
+                                <div class="recomendationsContainer">
+                                    <label for="recommendations">Recommendations:</label>
+                                    <input type="text" name="recommendations" class="recommendations" value="${answer.recommendations}">
+                                </div>
+                                <div class="rfindingsContainer">
+                                    <label for="findings">Findings:</label>
+                                    <input type="text" name="findings" class="findings" value="${answer.findings}">
+                                </div>
+                                <button type="button" class="removeAnswer">❌Remove Answer</button>
+                            </div>
+                        `);
+                    }
+
+                    $("#existingAnswers").append(answerContainer);
+                });
+            }
+
+            // Add your existing event handlers and functions as needed
+        });
+    </script>
+</body>
+
+</html>
