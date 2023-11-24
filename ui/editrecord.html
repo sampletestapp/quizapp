@@ -26,9 +26,9 @@
                 <option value="2">2</option>
                 <option value="3">3</option>
             </select><br />
-             <!-- Is Active -->
-             <label for="isActive">Is Active:</label>
-             <input type="checkbox" id="isActive"><br/><br/>
+            <!-- Is Active -->
+            <label for="isActive">Is Active:</label>
+            <input type="checkbox" id="isActive"><br/><br/>
             <!-- Section -->
             <label for="section">Section:</label>
             <select id="section" name="section" required></select><br />
@@ -163,9 +163,9 @@
                         </div>
                         
                     `);
-                    if (selectedType != "blank") {
-                        answerContainer.append(`<button type="button" class="removeAnswer">❌Remove Answer</button>`);
-                    }
+                        if (selectedType != "blank") {
+                            answerContainer.append(`<button type="button" class="removeAnswer">❌Remove Answer</button>`);
+                        }
                     }
                 });
                 $("#existingAnswers").append(answerContainer);
@@ -328,21 +328,21 @@
                 }
 
                 $.ajax({
-                    url: 'http://localhost:5253/api/Questions/' + questionId,  // Replace with your actual endpoint
+                    url: 'http://localhost:5253/api/Questions/' + questionId,
                     type: 'PUT',
                     contentType: 'application/json',
                     data: JSON.stringify(questionDto),
                     success: function (result) {
-                        console.log('Question created successfully', result);
+                        console.log('Question updated successfully', result);
+                        window.close();
+                        // Close the current window
+                        window.opener.location.href = "getRecords.html";
                     },
                     error: function (error) {
-                        console.error('Error creating question', error);
+                        console.error('Error Updating question', error);
+                        alert('Error: ' + error.responseText);
                     }
                 });
-
-                $("#questionList").html(
-                    '<div class="questionList">' + JSON.stringify(questionDto) + "</div>"
-                );
             });
 
 
