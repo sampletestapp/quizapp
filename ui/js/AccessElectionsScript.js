@@ -114,6 +114,7 @@ $(document).ready(function () {
       SectionId: parseInt($("#section").val()),
       ZoneId: parseInt($("#zones").val()),
       QuestionSeverityId: parseInt($("#questionSeverity").val()), // An integer value
+      IsActive: true,
       QuestionAnswers: []  // An empty array or provide answers if needed
     };
 
