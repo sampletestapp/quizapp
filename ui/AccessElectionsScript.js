@@ -197,7 +197,7 @@ $(document).ready(function () {
       },
       error: function (error) {
         console.error('Error creating question', error);
-        // Handle error here
+          alert('Error: ' + error.responseText);
       }
     });
 

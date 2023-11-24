@@ -22,8 +22,6 @@
         </thead>
         <tbody></tbody>
     </table>
-
-    <script src="script.js"></script>
     <script>
         // Code specific to the get records screen
         $(document).ready(function () {
@@ -49,14 +47,28 @@
                         {
                             data: 'questionNumber',
                             render: function (data, type, row) {
-                                // Render as a hyperlink for the question number
-                                return '<a href="editrecord.html?id=' + row.id + '">' + data + '</a>';
+                                // Render as a hyperlink for the question number with a click event
+                                return '<a href="#" class="open-popup" data-id="' + row.id + '">' + data + '</a>';
                             }
                         },
                         { data: 'questionTypeId', render: function (data) { return getQuestionTypeText(data); } },
                         { data: 'questionText' }
                     ]
                 });
+
+                // Handle click event for opening the popup
+                $('#questionsTable').on('click', '.open-popup', function (e) {
+                    e.preventDefault();
+                    var questionId = $(this).data('id');
+                    openPopup(questionId);
+                });
+            }
+
+            // Function to open the popup
+            function openPopup(questionId) {
+                // Adjust the URL and other window features as needed
+                var popupUrl = 'editrecord.html?id=' + questionId;
+                window.open(popupUrl, 'Question Popup', 'width=600,height=400');
             }
 
             // Function to get question type text based on the question type id

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AccessElectionsService.api.Models;
 using AccessElectionsService.api.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace AccessElectionsService.api.Controllers
 {
@@ -41,9 +43,31 @@ namespace AccessElectionsService.api.Controllers
         [HttpPost]
         public async Task<ActionResult<QuestionDto>> CreateQuestion(QuestionDto questionDto)
         {
-            var createdQuestion = await _questionService.CreateQuestion(questionDto);
+            try
+            {
+                var createdQuestion = await _questionService.CreateQuestion(questionDto);
+                return CreatedAtAction(nameof(GetQuestion), new { id = createdQuestion.Id }, createdQuestion);
+            }
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, out var errorCode))
+            {
+                return HandleUniqueConstraintViolation(errorCode, questionDto);
+            }
+        }
+        private static bool IsUniqueConstraintViolation(DbUpdateException ex, out int? errorCode)
+        {
+            var sqlException = ex.InnerException as SqlException;
+            errorCode = sqlException?.Number;
+            return errorCode == 2601 || errorCode == 2627;
+        }
 
-            return CreatedAtAction(nameof(GetQuestion), new { id = createdQuestion.Id }, createdQuestion);
+        // Helper method to handle the unique constraint violation
+        private ActionResult HandleUniqueConstraintViolation(int? errorCode, QuestionDto questionDto)
+        {
+            return errorCode switch
+            {
+                2601 or 2627 => BadRequest($"Question Number {questionDto.QuestionNumber} Already Exists"),
+                _ => throw new InvalidOperationException("Unhandled unique constraint violation.")
+            };
         }
 
         // PUT: api/questions/5
@@ -59,11 +83,14 @@ namespace AccessElectionsService.api.Controllers
             {
                 await _questionService.UpdateQuestion(questionDto);
             }
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, out var errorCode))
+            {
+                return HandleUniqueConstraintViolation(errorCode, questionDto);
+            }
             catch (Exception)
             {
                 return NotFound();
             }
-
             return NoContent();
         }
 

@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AccessElectionsService.api.Models
 {
     [Table("Question", Schema = "AE")]
+    [Index(nameof(QuestionNumber), IsUnique = true)]
     public class Question
     {
         public int Id { get; set; }
