@@ -24,6 +24,8 @@ $(document).ready(function () {
                   <div class="rfindingsContainer">
                       <label for="findings">Findings:</label>
                       <input type="text" name="findings" class="findings">
+                      <label for="findingDiscussion">Discussion:</label>
+                      <input type="text" name="findingDiscussion" class="findingDiscussion">
                   </div>
               </div>
           `);
@@ -49,6 +51,7 @@ $(document).ready(function () {
 
     optionsContainer.append(`
           <div class="answer" data-answer-id="${answerId}">
+              <label>Answer</label>
               <input type="text" name="${type}Answer">
               <div class="recomendationsContainer">
                   <label for="recommendations">Recommendations:</label>
@@ -58,6 +61,8 @@ $(document).ready(function () {
               <div class="rfindingsContainer">
                   <label for="findings">Findings:</label>
                   <input type="text" name="findings" class="findings" data-answer-id="${answerId}">
+                  <label for="findingDiscussion">Discussion:</label>
+                  <input type="text" name="findingDiscussion" class="findingDiscussion" data-answer-id="${answerId}">
               </div>
               <button type="button" class="removeAnswer">❌Remove Answer</button>
           </div>
@@ -143,10 +148,12 @@ $(document).ready(function () {
         recommendationsList.push(recommendation);
       });
       var findings = $("input.findings").val();
+      var findingDiscussion = $("input.findingDiscussion").val();
       answer.questionAnswerText = answerText;
       answer.recommendations= recommendationsList;
       answer.findings = {
-        questionAnswerFindingText: findings
+        questionAnswerFindingText: findings,
+        questionAnswerFindingDiscussion: findingDiscussion
       };
 
       questionDto.QuestionAnswers.push(answer);
@@ -176,10 +183,12 @@ $(document).ready(function () {
             recommendationsList.push(recommendation);
           });
 
-          // Get associated findings
+          // Get associated findings 
           var finding = $(`input.findings[data-answer-id="${answerId}"]`).val();
+          var findingDiscussion = $(`input.findingDiscussion[data-answer-id="${answerId}"]`).val();
           answer.findings = {
-            questionAnswerFindingText: finding
+            questionAnswerFindingText: finding,
+            questionAnswerFindingDiscussion: findingDiscussion
           };
           answer.recommendations = recommendationsList;
           questionDto.QuestionAnswers.push(answer);

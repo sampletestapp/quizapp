@@ -4,5 +4,6 @@
     {
         public int Id { get; set; }
         public string QuestionAnswerFindingText { get; set; }
+        public string QuestionAnswerFindingDiscussion { get; set; }
     }
 }

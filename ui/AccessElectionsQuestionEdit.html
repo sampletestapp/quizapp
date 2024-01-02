@@ -22,6 +22,7 @@
             <!-- Question Severity -->
             <label for="questionSeverity">Question Severity</label>
             <select id="questionSeverity" name="questionSeverity" required>
+                <option value="0">None</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -130,6 +131,8 @@
                         <div class="rfindingsContainer">
                             <label for="findings">Findings:</label>
                             <input type="text" name="findings" class="findings">
+                            <label for="findingDiscussion">Discussion:</label>
+                            <input type="text" name="findingDiscussion" class="findingDiscussion">
                         </div>
                     </div>
                     `);
@@ -159,6 +162,8 @@
                             <div class="findingsContainer">
                                 <label for="findings">Findings:</label>
                                 <input type="text" name="findings" class="findings" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingText}" />
+                                <label for="findingDiscussion">Discussion:</label>
+                                <input type="text" name="findingDiscussion" class="findingDiscussion" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingDiscussion}">
                             </div>
                         </div>
                         
@@ -283,10 +288,12 @@
                         recommendationsList.push(recommendation);
                     });
                     var findings = $("input.findings").val();
+                    var findingDiscussion = $("input.findingDiscussion").val();
                     answer.questionAnswerText = answerText;
                     answer.recommendations = recommendationsList;
                     answer.findings = {
-                        questionAnswerFindingText: findings
+                        questionAnswerFindingText: findings,
+                        questionAnswerFindingDiscussion: findingDiscussion
                     };
 
                     questionDto.QuestionAnswers.push(answer);
@@ -318,8 +325,10 @@
 
                             // Get associated findings
                             var finding = $(`input.findings[data-answer-id="${answerId}"]`).val();
+                            var findingDiscussion = $(`input.findingDiscussion[data-answer-id="${answerId}"]`).val();
                             answer.findings = {
-                                questionAnswerFindingText: finding
+                                questionAnswerFindingText: finding,
+                                questionAnswerFindingDiscussion: findingDiscussion
                             };
                             answer.recommendations = recommendationsList;
                             questionDto.QuestionAnswers.push(answer);
