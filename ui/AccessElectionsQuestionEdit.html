@@ -22,13 +22,14 @@
             <!-- Question Severity -->
             <label for="questionSeverity">Question Severity</label>
             <select id="questionSeverity" name="questionSeverity" required>
+                <option value="0">None</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
             </select><br />
-            <!-- Is Active -->
-            <label for="isActive">Is Active:</label>
-            <input type="checkbox" id="isActive"><br /><br />
+             <!-- Is Active -->
+             <label for="isActive">Is Active:</label>
+             <input type="checkbox" id="isActive"><br/><br/>
             <!-- Section -->
             <label for="section">Section:</label>
             <select id="section" name="section" required></select><br />
@@ -119,20 +120,22 @@
                 if (selectedType === "blank") {
                     // For "blank" type question with multiple recommendations
                     answerContainer.append(`
-                            <div class="answer" id="blankAnswer">
-                            <label>Answer</label><br />
-                            <input type="text" name="blankAnswer" /><br />
-                            <div class="recomendationsContainer">
-                                <label for="recommendations">Recommendations:</label>
-                                <input type="text" name="recommendations" class="recommendations">
-                                <button type="button" class="addRecommendation">Add Recommendation</button>
-                            </div>
-                            <div class="rfindingsContainer">
-                                <label for="findings">Finding:</label>
-                                <input type="text" name="findings" class="findings">
-                            </div>
+                        <div class="answer" id="blankAnswer">
+                        <label>Answer</label><br />
+                        <input type="text" name="blankAnswer" /><br />
+                        <div class="recomendationsContainer">
+                            <label for="recommendations">Recommendations:</label>
+                            <input type="text" name="recommendations" class="recommendations">
+                            <button type="button" class="addRecommendation">Add Recommendation</button>
                         </div>
-                        `);
+                        <div class="rfindingsContainer">
+                            <label for="findings">Findings:</label>
+                            <input type="text" name="findings" class="findings">
+                            <label for="findingDiscussion">Discussion:</label>
+                            <input type="text" name="findingDiscussion" class="findingDiscussion">
+                        </div>
+                    </div>
+                    `);
                 }
                 $("#existingAnswers").append(answerContainer);
                 if (selectedType != "blank") {
@@ -149,23 +152,25 @@
                     if (Array.isArray(answer.recommendations)) {
                         // For "blank" type question with multiple recommendations
                         answerContainer.append(`
-                            <div class="answer" data-answer-id="${answer.id}">
-                                <label>Answer</label><br />
-                                <input type="text" name="blankAnswer" value="${answer.questionAnswerText}" /><br />
-                                <div class="recommendationsContainer">
-                                    <label for="recommendations">Recommendations:</label><br />
-                                    ${generateRecommendationsInputs(answer.id, answer.recommendations)}
-                                </div>
-                                <div class="findingsContainer">
-                                    <label for="findings">Findings:</label>
-                                    <input type="text" name="findings" class="findings" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingText}" />
-                                </div>
+                        <div class="answer" data-answer-id="${answer.id}">
+                            <label>Answer</label><br />
+                            <input type="text" name="blankAnswer" value="${answer.questionAnswerText}" /><br />
+                            <div class="recommendationsContainer">
+                                <label for="recommendations">Recommendations:</label><br />
+                                ${generateRecommendationsInputs(answer.id, answer.recommendations)}
                             </div>
-
-                        `);
-                        if (selectedType != "blank") {
-                            answerContainer.append(`<button type="button" class="removeAnswer">❌Remove Answer</button>`);
-                        }
+                            <div class="findingsContainer">
+                                <label for="findings">Findings:</label>
+                                <input type="text" name="findings" class="findings" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingText}" />
+                                <label for="findingDiscussion">Discussion:</label>
+                                <input type="text" name="findingDiscussion" class="findingDiscussion" data-answer-id="${answer.id}" value="${answer.findings.questionAnswerFindingDiscussion}">
+                            </div>
+                        </div>
+                        
+                    `);
+                    if (selectedType != "blank") {
+                        answerContainer.append(`<button type="button" class="removeAnswer">❌Remove Answer</button>`);
+                    }
                     }
                 });
                 $("#existingAnswers").append(answerContainer);
@@ -178,21 +183,21 @@
                 var type = $(this).data("type");
                 var answerId = Date.now(); // Generate a unique ID for the answer
                 $(".answer-container").append(`
-                        <div class="answer" data-answer-id="${answerId}">
-                            <label>Answer</label><br />
-                            <input type="text" name="${type}Answer">
-                            <div class="recomendationsContainer">
-                                <label for="recommendations">Recommendations:</label>
-                                <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}">
-                                <button type="button" class="addRecommendation" data-answer-id="${answerId}">Add Recommendation</button>
-                            </div>
-                            <div class="rfindingsContainer">
-                                <label for="findings">Finding:</label>
-                                <input type="text" name="findings" class="findings" data-answer-id="${answerId}">
-                            </div>
-                            <button type="button" class="removeAnswer">❌Remove Answer</button>
+                    <div class="answer" data-answer-id="${answerId}">
+                        <label>Answer</label><br />
+                        <input type="text" name="${type}Answer">
+                        <div class="recomendationsContainer">
+                            <label for="recommendations">Recommendations:</label>
+                            <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}">
+                            <button type="button" class="addRecommendation" data-answer-id="${answerId}">Add Recommendation</button>
                         </div>
-                    `);
+                        <div class="rfindingsContainer">
+                            <label for="findings">Findings:</label>
+                            <input type="text" name="findings" class="findings" data-answer-id="${answerId}">
+                        </div>
+                        <button type="button" class="removeAnswer">❌Remove Answer</button>
+                    </div>
+                `);
             });
 
             $(document).on("click", ".removeAnswer", function () {
@@ -204,9 +209,9 @@
                 var answerId = $(this).data("answer-id");
                 var recommendationId = Date.now(); // Generate a unique ID for the recommendation
                 $(this).before(`
-                        <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">
-                        <button type="button" class="removeRecommendation" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button>
-                    `);
+                    <input type="text" name="recommendations" class="recommendations" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">
+                    <button type="button" class="removeRecommendation" data-answer-id="${answerId}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button>
+                `);
             });
 
             $(document).on("click", ".removeRecommendation", function () {
@@ -221,9 +226,9 @@
                 recommendations.forEach((recommendation, index) => {
                     var recommendationId = Date.now() + index;
                     recommendationsHtml += `
-                        <input type="text" name="recommendations" class="recommendations" value="${recommendation.questionAnswerRecommendationText}" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">
-                        <button type="button" class="removeRecommendation" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button><br />
-                    `;
+                    <input type="text" name="recommendations" class="recommendations" value="${recommendation.questionAnswerRecommendationText}" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">
+                    <button type="button" class="removeRecommendation" data-answer-id="${answerid}" data-recommendation-id="${recommendationId}">❌Remove Recommendation</button><br />
+                `;
                 });
                 recommendationsHtml += `<button type="button" class="addRecommendation">Add Recommendation</button>`;
                 return recommendationsHtml;
@@ -252,7 +257,7 @@
                     QuestionTypeId: questionTypeId,  // An integer value
                     QuestionNumber: $("#questionNumber").val(),
                     SectionId: parseInt($("#section").val()),
-                    IsActive: $("#isActive").prop("checked"),
+                    IsActive:  $("#isActive").prop("checked"),
                     ZoneId: parseInt($("#zones").val()),
                     QuestionSeverityId: parseInt($("#questionSeverity").val()), // An integer value
                     QuestionAnswers: []  // An empty array or provide answers if needed
@@ -283,10 +288,12 @@
                         recommendationsList.push(recommendation);
                     });
                     var findings = $("input.findings").val();
+                    var findingDiscussion = $("input.findingDiscussion").val();
                     answer.questionAnswerText = answerText;
                     answer.recommendations = recommendationsList;
                     answer.findings = {
-                        questionAnswerFindingText: findings
+                        questionAnswerFindingText: findings,
+                        questionAnswerFindingDiscussion: findingDiscussion
                     };
 
                     questionDto.QuestionAnswers.push(answer);
@@ -318,8 +325,10 @@
 
                             // Get associated findings
                             var finding = $(`input.findings[data-answer-id="${answerId}"]`).val();
+                            var findingDiscussion = $(`input.findingDiscussion[data-answer-id="${answerId}"]`).val();
                             answer.findings = {
-                                questionAnswerFindingText: finding
+                                questionAnswerFindingText: finding,
+                                questionAnswerFindingDiscussion: findingDiscussion
                             };
                             answer.recommendations = recommendationsList;
                             questionDto.QuestionAnswers.push(answer);
@@ -328,21 +337,21 @@
                 }
 
                 $.ajax({
-                    url: 'http://localhost:5253/api/Questions/' + questionId,
+                    url: 'http://localhost:5253/api/Questions/' + questionId,  // Replace with your actual endpoint
                     type: 'PUT',
                     contentType: 'application/json',
                     data: JSON.stringify(questionDto),
                     success: function (result) {
-                        console.log('Question updated successfully', result);
-                        window.close();
-                        // Close the current window
-                        window.opener.location.href = "AccessElectionsMatrix.html";
+                        console.log('Question created successfully', result);
                     },
                     error: function (error) {
-                        console.error('Error Updating question', error);
-                        alert('Error: ' + error.responseText);
+                        console.error('Error creating question', error);
                     }
                 });
+
+                //$("#questionList").html(
+                //    '<div class="questionList">' + JSON.stringify(questionDto) + "</div>"
+                //);
             });
 
 

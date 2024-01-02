@@ -84,7 +84,8 @@ namespace AccessElectionsService.api.Services
                     {
                         newAnswer.Findings = new QuestionAnswerFinding
                         {
-                            QuestionAnswerFindingText = answerDto.Findings.QuestionAnswerFindingText
+                            QuestionAnswerFindingText = answerDto.Findings.QuestionAnswerFindingText,
+                            QuestionAnswerFindingDiscussion = answerDto.Findings.QuestionAnswerFindingDiscussion
                         };
                     }
 

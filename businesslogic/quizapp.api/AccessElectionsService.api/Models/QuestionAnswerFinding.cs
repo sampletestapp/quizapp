@@ -7,6 +7,7 @@ namespace AccessElectionsService.api.Models
     {
         public int Id { get; set; }
         public string QuestionAnswerFindingText { get; set; }
+        public string QuestionAnswerFindingDiscussion { get; set; }
         public int QuestionAnswerId { get; set; }
         public QuestionAnswer QuestionAnswer { get; set; }
         public int CreatedBy { get; set; }
