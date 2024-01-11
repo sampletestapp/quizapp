@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\yelganxgea\source\repos\quizapp\businesslogic\quizapp.api\AccessElectionsService.api\bin\Release\net8.0\publish\</_PublishTargetUrl>
+    <History>True|2023-12-14T16:41:03.1008357Z;True|2023-12-06T10:17:09.3423767-06:00;True|2023-12-06T10:05:15.4029909-06:00;True|2023-12-05T15:40:01.6832262-06:00;True|2023-12-05T15:04:34.8048723-06:00;True|2023-12-05T15:04:28.3933968-06:00;True|2023-12-05T15:03:47.5238197-06:00;True|2023-12-04T12:46:36.1505010-06:00;</History>
+    <LastFailureDetails />
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+  </PropertyGroup>
+</Project>
