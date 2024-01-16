@@ -1,7 +1,6 @@
 ﻿using AccessElectionsService.api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Options;
 using System.Data;
 
 namespace AccessElectionsService.api.Controllers
@@ -12,6 +11,7 @@ namespace AccessElectionsService.api.Controllers
     {
         private readonly IConfiguration _configuration;
         private string[]? _restoreTableNames;
+        private string[]? _identityColumns;
         private string? _restoreDbName;
         public DataHandlerController(IConfiguration configuration)
         {
@@ -23,11 +23,10 @@ namespace AccessElectionsService.api.Controllers
         {
             try
             {
-                dataHandler.DBBackupFilePath = "D:\\Work\\Tobedeeleted\\Naren\\T011.bak";
                 GetRestoreTableDbNames();
                 RestoreDbFromBackUp(dataHandler.DBBackupFilePath);
                 CopyDataToTarget();
-                //RemoveTheTempDb();
+                RemoveTheTempDb();
                 return Ok("Data copy process completed.");
             }
             catch (Exception ex)
@@ -44,15 +43,16 @@ namespace AccessElectionsService.api.Controllers
             // Get the comma-separated table names
             var tableNames = tablesSection.GetValue<string>("Tables");
             var dbName = tablesSection.GetValue<string>("Db");
+            var identityColumns = tablesSection.GetValue<string>("IdentityColumns");
 
             // Split the table names into an array
             _restoreTableNames = tableNames?.Split(',').Select(tableName => tableName.Trim()).ToArray();
+            _identityColumns = identityColumns?.Split(',').Select(columnName => columnName.Trim()).ToArray();
             _restoreDbName = dbName?.ToString();
         }
 
         private void RemoveTheTempDb()
         {
-            var databaseName = "CompanyDB";
             // Set the connection string for the master database
             string? masterConnectionString = _configuration.GetConnectionString("DataMasterConnection");
 
@@ -64,17 +64,17 @@ namespace AccessElectionsService.api.Controllers
                 // Set the database to SINGLE_USER mode
                 using (SqlCommand setSingleUserCommand = masterConnection.CreateCommand())
                 {
-                    setSingleUserCommand.CommandText = $"USE master; ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
+                    setSingleUserCommand.CommandText = $"USE master; ALTER DATABASE [{_restoreDbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
                     setSingleUserCommand.ExecuteNonQuery();
                 }
 
                 // Drop the database
                 using (SqlCommand dropCommand = masterConnection.CreateCommand())
                 {
-                    dropCommand.CommandText = $"USE master; DROP DATABASE [{databaseName}];";
+                    dropCommand.CommandText = $"USE master; DROP DATABASE [{_restoreDbName}];";
                     dropCommand.ExecuteNonQuery();
 
-                    Console.WriteLine($"Database '{databaseName}' dropped successfully.");
+                    Console.WriteLine($"Database '{_restoreDbName}' dropped successfully.");
                 }
             }
         }
@@ -88,9 +88,8 @@ namespace AccessElectionsService.api.Controllers
             string? targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
 
             // List of tables to copy data from
-            string[] tablesToCopy = { "SurveyResponse", "PollingPlacePhoto", "ActivityLog", "SurveyResponseHistory" };
 
-            foreach (var tableName in tablesToCopy)
+            foreach (var tableName in _restoreTableNames)
             {
                 // Create SqlConnection for the source database
                 using (SqlConnection sourceConnection = new SqlConnection(sourceConnectionString))
@@ -99,7 +98,7 @@ namespace AccessElectionsService.api.Controllers
 
                     // Get column names from the current table in the source database
                     DataTable schemaTable = sourceConnection.GetSchema("Columns", new[] { null, null, tableName, null });
-                    string?[] columnNames = schemaTable.AsEnumerable().Select(row => row.Field<string>("COLUMN_NAME")).ToArray();
+                    string?[] columnNames = schemaTable.AsEnumerable().Select(row => row.Field<string>("COLUMN_NAME")).ToArray().Except(_identityColumns).ToArray();
 
                     // Create a SqlCommand to select data from the current table
                     using (SqlCommand selectCommand = sourceConnection.CreateCommand())
@@ -123,23 +122,9 @@ namespace AccessElectionsService.api.Controllers
                                     // Define parameters for the insert command
                                     foreach (var columnName in columnNames)
                                     {
-                                        //if (columnName == "Response") // Assuming "Response" is your XML column name
-                                        //{
-                                        //    insertCommand.Parameters.Add($"@{columnName}", SqlDbType.Xml);
-                                        //}
-                                        //else
-                                        //{
-                                        if (columnName == "PollingPlacePhoto")
-                                        {
-                                            insertCommand.Parameters["PollingPlacePhoto"].Value = DBNull.Value;
-                                        }
-                                        else
-                                        {
-                                            // Adjust SqlDbType accordingly based on the data type of the column
-                                            SqlDbType sqlDbType = GetSqlDbTypeForColumn(columnName, schemaTable);
-                                            insertCommand.Parameters.Add($"@{columnName}", sqlDbType, GetSizeForColumn(columnName, schemaTable));
-                                        }
-                                        //}
+                                        // Adjust SqlDbType accordingly based on the data type of the column
+                                        SqlDbType sqlDbType = GetSqlDbTypeForColumn(columnName, schemaTable);
+                                        insertCommand.Parameters.Add($"@{columnName}", sqlDbType, GetSizeForColumn(columnName, schemaTable));
                                     }
 
                                     // Iterate through the source data and insert into the target database
@@ -227,8 +212,7 @@ namespace AccessElectionsService.api.Controllers
             }
             return -1; // Return -1 if size information is not available or not applicable
         }
-
-
+        
         private void RestoreDbFromBackUp(string dbBackupFilePath)
         {
             // Set the connection string for the master database
