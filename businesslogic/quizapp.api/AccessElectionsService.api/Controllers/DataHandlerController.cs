@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Xml;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace AccessElectionsService.api.Controllers
 {
@@ -26,7 +28,10 @@ namespace AccessElectionsService.api.Controllers
                 GetRestoreTableDbNames();
                 RestoreDbFromBackUp(dataHandler.DBBackupFilePath);
                 CopyDataToTarget();
+                //Read only from temp
+                ProcessSurveys();
                 RemoveTheTempDb();
+                //Transformation and loading to resposnetables
                 return Ok("Data copy process completed.");
             }
             catch (Exception ex)
@@ -34,6 +39,136 @@ namespace AccessElectionsService.api.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+
+        //[HttpPost]
+        //[Route("api/survey/process")]
+        private IActionResult ProcessSurveys()
+        {
+            string connectionStringTarget = _configuration.GetConnectionString("DataTargetConnection");
+            string connectionStringSource = _configuration.GetConnectionString("DataSourceConnection");
+
+            try
+            {
+                // Connection for creating the table
+                using (SqlConnection createTableConnection = new SqlConnection(connectionStringTarget))
+                {
+                    createTableConnection.Open();
+
+                    string checkTableQuery = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'AE' AND TABLE_NAME = 'ResponseResults') " +
+                          "CREATE TABLE AE.ResponseResults ( " +
+                          "    ID INT IDENTITY(1,1) PRIMARY KEY, " +
+                          "    SurveyID INT, " +
+                          "    QuestionID VARCHAR(50), " +
+                          "    Answer VARCHAR(MAX), " +
+                          "    PPLID INT, " +
+                          "    ConductedDate DATETIME," +
+                          "    CreatedUserID INT" +
+                          ")";
+
+                    using (SqlCommand createTableCommand = new SqlCommand(checkTableQuery, createTableConnection))
+                    {
+                        createTableCommand.ExecuteNonQuery();
+                    }
+                }
+
+                // Connection for reading data
+                using (SqlConnection readDataConnection = new SqlConnection(connectionStringSource))
+                {
+                    readDataConnection.Open();
+
+                    // Fetch data from SurveyResponse table
+                    string selectQuery = "SELECT SurveyID, PPLID, Response, ConductedDate, CreatedUserID FROM SurveyResponse";
+
+                    using (SqlCommand selectCommand = new SqlCommand(selectQuery, readDataConnection))
+                    {
+                        using (SqlDataReader reader = selectCommand.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                // Read data from the database
+                                int surveyId = reader.GetInt32(reader.GetOrdinal("SurveyID"));
+                                int pplId = reader.GetInt32(reader.GetOrdinal("PPLID"));
+                                string xmlData = reader.GetString(reader.GetOrdinal("Response"));
+                                int createdUserID = reader.GetInt32(reader.GetOrdinal("CreatedUserID"));
+                                DateTime conductedDate = reader.GetDateTime(reader.GetOrdinal("ConductedDate"));
+
+                                // Process XML data
+                                ProcessXmlData(surveyId, pplId, xmlData, conductedDate, createdUserID);
+                            }
+                        }
+                    }
+                }
+
+                return Ok("Data processed successfully!");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
+        private void ProcessXmlData(int surveyId, int pplId, string xmlData, DateTime conductedDate, int createdUserID)
+        {
+            try
+            {
+                // Parse XML
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(xmlData);
+                var connectionString = _configuration.GetConnectionString("DataTargetConnection");
+
+
+                // Extract data from XML
+                XmlNodeList questionNodes = xmlDoc.SelectNodes("//Question");
+                foreach (XmlNode questionNode in questionNodes)
+                {
+                    string questionId = questionNode.Attributes["ID"].Value;
+                    string answer = questionNode.SelectSingleNode("Answer").InnerText;
+
+                    //Insert data into SQL Server
+                    string insertQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, Answer, PPLID, ConductedDate, CreatedUserID) " +
+                                         "VALUES (@SurveyID, @QuestionID, @Answer, @PPLID, @ConductedDate ,@CreatedUserID)";
+
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        using (SqlCommand command = new SqlCommand(insertQuery, connection))
+                        {
+
+                            //seperate the surveyId, PollingId, createdDate, ElectionId to a survey table
+                            command.Parameters.AddWithValue("@SurveyID", surveyId);
+                            command.Parameters.AddWithValue("@QuestionID", questionId);
+                            command.Parameters.AddWithValue("@Answer", answer);
+                            command.Parameters.AddWithValue("@PPLID", pplId);
+                            command.Parameters.AddWithValue("@ConductedDate", conductedDate);
+                            command.Parameters.AddWithValue("@CreatedUserID", createdUserID);
+
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle parsing or insertion errors
+                Console.WriteLine($"Error processing survey with SurveyID {surveyId}: {ex.Message}");
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         private void GetRestoreTableDbNames()
         {
@@ -117,7 +252,7 @@ namespace AccessElectionsService.api.Controllers
                                 using (SqlCommand insertCommand = targetConnection.CreateCommand())
                                 {
                                     // Prepare the insert command dynamically based on column names
-                                    insertCommand.CommandText = $"INSERT INTO {tableName} ({string.Join(", ", columnNames)}) VALUES ({string.Join(", ", columnNames.Select(col => $"@{col}"))})";
+                                    insertCommand.CommandText = $"INSERT INTO AE.{tableName} ({string.Join(", ", columnNames)}) VALUES ({string.Join(", ", columnNames.Select(col => $"@{col}"))})";
 
                                     // Define parameters for the insert command
                                     foreach (var columnName in columnNames)
@@ -212,7 +347,7 @@ namespace AccessElectionsService.api.Controllers
             }
             return -1; // Return -1 if size information is not available or not applicable
         }
-        
+
         private void RestoreDbFromBackUp(string dbBackupFilePath)
         {
             // Set the connection string for the master database
