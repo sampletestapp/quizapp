@@ -45,32 +45,13 @@ namespace AccessElectionsService.api.Controllers
         //[Route("api/survey/process")]
         private IActionResult ProcessSurveys()
         {
-            string connectionStringTarget = _configuration.GetConnectionString("DataTargetConnection");
-            string connectionStringSource = _configuration.GetConnectionString("DataSourceConnection");
+            string? connectionStringTarget = _configuration.GetConnectionString("DataTargetConnection");
+            string? connectionStringSource = _configuration.GetConnectionString("DataSourceConnection");
 
             try
             {
                 // Connection for creating the table
-                using (SqlConnection createTableConnection = new SqlConnection(connectionStringTarget))
-                {
-                    createTableConnection.Open();
-
-                    string checkTableQuery = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'AE' AND TABLE_NAME = 'ResponseResults') " +
-                          "CREATE TABLE AE.ResponseResults ( " +
-                          "    ID INT IDENTITY(1,1) PRIMARY KEY, " +
-                          "    SurveyID INT, " +
-                          "    QuestionID VARCHAR(50), " +
-                          "    Answer VARCHAR(MAX), " +
-                          "    PPLID INT, " +
-                          "    ConductedDate DATETIME," +
-                          "    CreatedUserID INT" +
-                          ")";
-
-                    using (SqlCommand createTableCommand = new SqlCommand(checkTableQuery, createTableConnection))
-                    {
-                        createTableCommand.ExecuteNonQuery();
-                    }
-                }
+                CreateTargetTableIfNotExists(connectionStringTarget);
 
                 // Connection for reading data
                 using (SqlConnection readDataConnection = new SqlConnection(connectionStringSource))
@@ -87,14 +68,14 @@ namespace AccessElectionsService.api.Controllers
                             while (reader.Read())
                             {
                                 // Read data from the database
-                                int surveyId = reader.GetInt32(reader.GetOrdinal("SurveyID"));
                                 int pplId = reader.GetInt32(reader.GetOrdinal("PPLID"));
                                 string xmlData = reader.GetString(reader.GetOrdinal("Response"));
                                 int createdUserID = reader.GetInt32(reader.GetOrdinal("CreatedUserID"));
                                 DateTime conductedDate = reader.GetDateTime(reader.GetOrdinal("ConductedDate"));
 
                                 // Process XML data
-                                ProcessXmlData(surveyId, pplId, xmlData, conductedDate, createdUserID);
+                                int surveyId = SurveyDataProcessing(pplId, conductedDate, createdUserID);
+                                SurveyResponseResultsProcessing(surveyId, xmlData);
                             }
                         }
                     }
@@ -108,8 +89,86 @@ namespace AccessElectionsService.api.Controllers
             }
         }
 
+        private static void CreateTargetTableIfNotExists(string? connectionStringTarget)
+        {
+            using (SqlConnection createTableConnection = new SqlConnection(connectionStringTarget))
+            {
+                createTableConnection.Open();
 
-        private void ProcessXmlData(int surveyId, int pplId, string xmlData, DateTime conductedDate, int createdUserID)
+                string createSurveyTableQuery = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'AE' AND TABLE_NAME = 'Survey') " +
+                                "CREATE TABLE AE.Survey (" +
+                                "    ID INT IDENTITY(1,1) PRIMARY KEY, " +
+                                "    PPLID INT, " +
+                                "    ConductedDate DATETIME, " +
+                                "    CreatedUserID INT " +
+                                ")";
+
+                string createResponseResultsTableQuery = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'AE' AND TABLE_NAME = 'ResponseResults') " +
+                                                         "CREATE TABLE AE.ResponseResults (" +
+                                                         "    ID INT IDENTITY(1,1) PRIMARY KEY, " +
+                                                         "    SurveyID INT, " +
+                                                         "    QuestionID VARCHAR(50), " +
+                                                         "    Answer VARCHAR(MAX) " +
+                                                         ")";
+
+
+
+
+                using (SqlCommand createTableCommand = new SqlCommand(createSurveyTableQuery, createTableConnection))
+                {
+                    createTableCommand.ExecuteNonQuery();
+                }
+                using (SqlCommand createTableCommand = new SqlCommand(createResponseResultsTableQuery, createTableConnection))
+                {
+                    createTableCommand.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private int SurveyDataProcessing(int pplId, DateTime conductedDate, int createdUserID)
+        {
+            int insertedRowId = 0;
+            try
+            {
+                // Parse XML
+                var connectionString = _configuration.GetConnectionString("DataTargetConnection");
+
+                //Insert data into SQL Server
+                string insertQuery = "INSERT INTO AE.Survey (PPLID, ConductedDate, CreatedUserID) " +
+                                     "VALUES (@PPLID, @ConductedDate ,@CreatedUserID);" +
+                                     "SELECT SCOPE_IDENTITY();";  // Add this line to retrieve the identity value
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    
+                    using (SqlCommand command = new SqlCommand(insertQuery, connection))
+                    {
+                        //seperate the surveyId, PollingId, createdDate, ElectionId to a survey table
+                        command.Parameters.AddWithValue("@PPLID", pplId);
+                        command.Parameters.AddWithValue("@ConductedDate", conductedDate);
+                        command.Parameters.AddWithValue("@CreatedUserID", createdUserID);
+                        // ExecuteScalar to get the identity value
+                        var identity = command.ExecuteScalar();
+                        
+                        // Cast the identity value to the appropriate data type
+                        if (identity != null && identity != DBNull.Value)
+                        {
+                            insertedRowId = Convert.ToInt32(identity);
+                            // Now you have the identity of the inserted row in the variable 'insertedRowId'
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle parsing or insertion errors
+                Console.WriteLine($"Error processing survey with SurveyID {pplId}: {ex.Message}");
+            }
+            return insertedRowId;
+        }
+
+
+        private void SurveyResponseResultsProcessing(int surveyId, string xmlData)
         {
             try
             {
@@ -127,8 +186,8 @@ namespace AccessElectionsService.api.Controllers
                     string answer = questionNode.SelectSingleNode("Answer").InnerText;
 
                     //Insert data into SQL Server
-                    string insertQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, Answer, PPLID, ConductedDate, CreatedUserID) " +
-                                         "VALUES (@SurveyID, @QuestionID, @Answer, @PPLID, @ConductedDate ,@CreatedUserID)";
+                    string insertQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, Answer) " +
+                                         "VALUES (@SurveyID, @QuestionID, @Answer)";
 
                     using (SqlConnection connection = new SqlConnection(connectionString))
                     {
@@ -141,10 +200,7 @@ namespace AccessElectionsService.api.Controllers
                             command.Parameters.AddWithValue("@SurveyID", surveyId);
                             command.Parameters.AddWithValue("@QuestionID", questionId);
                             command.Parameters.AddWithValue("@Answer", answer);
-                            command.Parameters.AddWithValue("@PPLID", pplId);
-                            command.Parameters.AddWithValue("@ConductedDate", conductedDate);
-                            command.Parameters.AddWithValue("@CreatedUserID", createdUserID);
-
+                       
                             command.ExecuteNonQuery();
                         }
                     }
@@ -156,19 +212,6 @@ namespace AccessElectionsService.api.Controllers
                 Console.WriteLine($"Error processing survey with SurveyID {surveyId}: {ex.Message}");
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         private void GetRestoreTableDbNames()
         {
