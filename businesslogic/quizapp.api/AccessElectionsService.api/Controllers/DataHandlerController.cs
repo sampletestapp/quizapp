@@ -24,12 +24,12 @@ namespace AccessElectionsService.api.Controllers
         {
             try
             {
-                //dataHandler.DBBackupFilePath = "D:\\Work\\Tobedeeleted\\Naren\\test.bak";
+                dataHandler.backupFilePath = "D:\\Work\\Tobedeeleted\\Naren\\test.bak";
                 GetRestoreTableDbNames();
-                RestoreDbFromBackUp(dataHandler.DBBackupFilePath);
+                RestoreDbFromBackUp(dataHandler.backupFilePath);
                 CopyDataToTarget();
                 //Read only from temp
-                ProcessSurveys();
+                ProcessSurveys(dataHandler.elecyiionId);
                 RemoveTheTempDb();
                 return Ok("Data copy process completed.");
             }
@@ -39,7 +39,7 @@ namespace AccessElectionsService.api.Controllers
             }
         }
 
-       private IActionResult ProcessSurveys()
+       private IActionResult ProcessSurveys(int elecyiionId)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace AccessElectionsService.api.Controllers
                     {
                         using (SqlDataReader reader = selectCommand.ExecuteReader())
                         {
-                            ProcessSurveyData(reader);
+                            ProcessSurveyData(reader, elecyiionId);
                         }
                     }
                 }
@@ -72,7 +72,7 @@ namespace AccessElectionsService.api.Controllers
             }
         }
 
-        private void ProcessSurveyData(SqlDataReader reader)
+        private void ProcessSurveyData(SqlDataReader reader, int electionId)
         {
             while (reader.Read())
             {
@@ -84,7 +84,7 @@ namespace AccessElectionsService.api.Controllers
                     ? null
                     : reader.GetDateTime(reader.GetOrdinal("ConductedDate"));
 
-                int surveyId = SurveyDataProcessing(pplId, conductedDate, createdUserID);
+                int surveyId = SurveyDataProcessing(pplId, conductedDate, createdUserID, electionId);
 
                 try
                 {
@@ -106,14 +106,16 @@ namespace AccessElectionsService.api.Controllers
                 using (SqlConnection createTableConnection = new SqlConnection(connectionStringTarget))
                 {
                     createTableConnection.Open();
-
                     string createSurveyTableQuery = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'AE' AND TABLE_NAME = 'Survey') " +
-                                    "CREATE TABLE AE.Survey (" +
-                                    "    ID INT IDENTITY(1,1) PRIMARY KEY, " +
-                                    "    PPLID INT, " +
-                                    "    ConductedDate DATETIME, " +
-                                    "    CreatedUserID INT " +
-                                    ")";
+                                "CREATE TABLE AE.Survey (" +
+                                "    ID INT IDENTITY(1,1) PRIMARY KEY, " +
+                                "    PPLID INT, " +
+                                "    ElectionID INT, " +
+                                "    ConductedDate DATETIME, " +
+                                "    CreatedUserID INT, " +
+                                "    CONSTRAINT UQ_PPLID_ElectionID UNIQUE (PPLID, ElectionID)" +
+                                ")";
+
 
                     string createResponseResultsTableQuery = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'AE' AND TABLE_NAME = 'ResponseResults') " +
                                                              "CREATE TABLE AE.ResponseResults (" +
@@ -143,7 +145,7 @@ namespace AccessElectionsService.api.Controllers
             }
         }
 
-        private int SurveyDataProcessing(int pplId, DateTime? conductedDate, int createdUserID)
+        private int SurveyDataProcessing(int pplId, DateTime? conductedDate, int createdUserID, int electionId)
         {
             int insertedRowId = 0;
             try
@@ -152,8 +154,8 @@ namespace AccessElectionsService.api.Controllers
                 var connectionString = _configuration.GetConnectionString("DataTargetConnection");
 
                 //Insert data into SQL Server
-                string insertQuery = "INSERT INTO AE.Survey (PPLID, ConductedDate, CreatedUserID) " +
-                                     "VALUES (@PPLID, @ConductedDate ,@CreatedUserID);" +
+                string insertQuery = "INSERT INTO AE.Survey (PPLID, ElectionID, ConductedDate, CreatedUserID) " +
+                                     "VALUES (@PPLID, @ElectionID, @ConductedDate ,@CreatedUserID);" +
                                      "SELECT SCOPE_IDENTITY();";  // Add this line to retrieve the identity value
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
@@ -163,6 +165,7 @@ namespace AccessElectionsService.api.Controllers
                     {
                         //seperate the surveyId, PollingId, createdDate, ElectionId to a survey table
                         command.Parameters.AddWithValue("@PPLID", pplId);
+                        command.Parameters.AddWithValue("@ElectionID", electionId);
                         command.Parameters.AddWithValue("@ConductedDate", conductedDate == null ? DBNull.Value : conductedDate);
                         command.Parameters.AddWithValue("@CreatedUserID", createdUserID);
                         // ExecuteScalar to get the identity value

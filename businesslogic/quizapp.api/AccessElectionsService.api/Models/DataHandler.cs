@@ -2,6 +2,7 @@
 {
     public class DataHandler
     {
-        public string DBBackupFilePath { get; set; }
+        public string backupFilePath { get; set; }
+        public int elecyiionId {  get; set; }
     }
 }
