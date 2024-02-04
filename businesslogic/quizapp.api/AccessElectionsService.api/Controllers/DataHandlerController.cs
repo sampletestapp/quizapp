@@ -39,7 +39,79 @@ namespace AccessElectionsService.api.Controllers
             }
         }
 
-       private IActionResult ProcessSurveys(int elecyiionId)
+
+
+        [HttpGet("get-records")]
+        public IActionResult GetRecords(int pplId, int electionId)
+        {
+            try
+            {
+                string targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+
+                List<ResponseResultModel> records = RetrieveRecords(targetConnectionString, pplId, electionId);
+
+                return Ok(records);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
+        private List<ResponseResultModel> RetrieveRecords(string connectionString, int pplId, int electionId)
+        {
+            List<ResponseResultModel> records = new List<ResponseResultModel>();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string selectRecordsQuery = @"
+                                                SELECT rr.*
+                                                FROM AE.ResponseResults rr
+                                                INNER JOIN AE.Survey s ON rr.SurveyID = s.ID
+                                                WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
+
+
+                    using (SqlCommand selectCommand = new SqlCommand(selectRecordsQuery, connection))
+                    {
+                        selectCommand.Parameters.AddWithValue("@PPLID", pplId);
+                        selectCommand.Parameters.AddWithValue("@ElectionID", electionId);
+
+                        using (SqlDataReader reader = selectCommand.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                // Map data to your model and add to the list
+                                ResponseResultModel record = new ResponseResultModel
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")), // Assuming Id is an integer, adjust accordingly
+                                    SurveyID = reader.GetInt32(reader.GetOrdinal("SurveyID")),
+                                    QuestionID = reader.IsDBNull(reader.GetOrdinal("QuestionID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionID")),
+                                    QuestionNumber = reader.IsDBNull(reader.GetOrdinal("QuestionNumber")) ? null : reader.GetString(reader.GetOrdinal("QuestionNumber")),
+                                    AnswerID = reader.IsDBNull(reader.GetOrdinal("AnswerID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("AnswerID")),
+                                    AnswerText = reader.IsDBNull(reader.GetOrdinal("AnswerText")) ? null : reader.GetString(reader.GetOrdinal("AnswerText"))
+                                    //AnswerText = reader.GetString(reader.GetOrdinal("AnswerText"))
+                                };
+                                records.Add(record);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine($"Error retrieving records: {ex.Message}");
+            }
+
+            return records;
+        }
+
+        private IActionResult ProcessSurveys(int elecyiionId)
         {
             try
             {
@@ -123,7 +195,7 @@ namespace AccessElectionsService.api.Controllers
                                                              "    SurveyID INT, " +
                                                              "    QuestionID INT, " +
                                                              "    QuestionNumber VARCHAR(50), " +
-                                                             "    AnswerID VARCHAR(MAX), " +
+                                                             "    AnswerID INT, " +
                                                              "    AnswerText VARCHAR(MAX) " +
                                                              ")";
 
@@ -272,7 +344,7 @@ namespace AccessElectionsService.api.Controllers
             return null;
         }
 
-        private void InsertResponseResult(string connectionString, int surveyId, int? questionId, string questionNumber,int? answerId, string? answerText)
+        private void InsertResponseResult(string connectionString, int surveyId, int? questionId, string questionNumber, int? answerId, string? answerText)
         {
             string insertQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, QuestionNumber, AnswerID, AnswerText) " +
                                  "VALUES (@SurveyID, @QuestionID, @QuestionNumber, @AnswerID, @AnswerText)";
