@@ -24,14 +24,13 @@ namespace AccessElectionsService.api.Controllers
         {
             try
             {
-                dataHandler.DBBackupFilePath = "D:\\Work\\Tobedeeleted\\Naren\\test.bak";
+                //dataHandler.DBBackupFilePath = "D:\\Work\\Tobedeeleted\\Naren\\test.bak";
                 GetRestoreTableDbNames();
                 RestoreDbFromBackUp(dataHandler.DBBackupFilePath);
                 CopyDataToTarget();
                 //Read only from temp
                 ProcessSurveys();
                 RemoveTheTempDb();
-                //Transformation and loading to resposnetables
                 return Ok("Data copy process completed.");
             }
             catch (Exception ex)
@@ -40,60 +39,26 @@ namespace AccessElectionsService.api.Controllers
             }
         }
 
-
-        //[HttpPost]
-        //[Route("api/survey/process")]
-        private IActionResult ProcessSurveys()
+       private IActionResult ProcessSurveys()
         {
-            string? connectionStringTarget = _configuration.GetConnectionString("DataTargetConnection");
-            string? connectionStringSource = _configuration.GetConnectionString("DataSourceConnection");
-
             try
             {
-                // Connection for creating the table
+                string connectionStringTarget = _configuration.GetConnectionString("DataTargetConnection");
+                string connectionStringSource = _configuration.GetConnectionString("DataSourceConnection");
+
                 CreateTargetTableIfNotExists(connectionStringTarget);
 
-                // Connection for reading data
                 using (SqlConnection readDataConnection = new SqlConnection(connectionStringSource))
                 {
                     readDataConnection.Open();
 
-                    // Fetch data from SurveyResponse table
                     string selectQuery = "SELECT SurveyID, PPLID, Response, ConductedDate, CreatedUserID FROM SurveyResponse";
 
                     using (SqlCommand selectCommand = new SqlCommand(selectQuery, readDataConnection))
                     {
                         using (SqlDataReader reader = selectCommand.ExecuteReader())
                         {
-                            while (reader.Read())
-                            {
-                                // Read data from the database
-                                int pplId = reader.GetInt32(reader.GetOrdinal("PPLID"));
-                                string xmlData = reader.GetString(reader.GetOrdinal("Response"));
-                                int createdUserID = reader.GetInt32(reader.GetOrdinal("CreatedUserID"));
-                                // DateTime conductedDate = reader.GetDateTime(reader.GetOrdinal("ConductedDate"));
-
-                                DateTime? conductedDate = null;  // Use Nullable<DateTime> to allow for null values
-
-                                int conductedDateOrdinal = reader.GetOrdinal("ConductedDate");
-
-                                if (!reader.IsDBNull(conductedDateOrdinal))
-                                {
-                                    conductedDate = reader.GetDateTime(conductedDateOrdinal);
-                                }
-
-                                // Process XML data
-                                int surveyId = SurveyDataProcessing(pplId, conductedDate, createdUserID);
-                                try
-                                {
-                                    SurveyResponseResultsProcessing(surveyId, xmlData);
-
-                                }
-                                catch (Exception ex)
-                                {
-                                    throw;
-                                }
-                            }
+                            ProcessSurveyData(reader);
                         }
                     }
                 }
@@ -102,9 +67,37 @@ namespace AccessElectionsService.api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                Console.WriteLine($"Error processing surveys: {ex.Message}");
+                throw;
             }
         }
+
+        private void ProcessSurveyData(SqlDataReader reader)
+        {
+            while (reader.Read())
+            {
+                int pplId = reader.GetInt32(reader.GetOrdinal("PPLID"));
+                string xmlData = reader.GetString(reader.GetOrdinal("Response"));
+                int createdUserID = reader.GetInt32(reader.GetOrdinal("CreatedUserID"));
+
+                DateTime? conductedDate = reader.IsDBNull(reader.GetOrdinal("ConductedDate"))
+                    ? null
+                    : reader.GetDateTime(reader.GetOrdinal("ConductedDate"));
+
+                int surveyId = SurveyDataProcessing(pplId, conductedDate, createdUserID);
+
+                try
+                {
+                    SurveyResponseResultsProcessing(surveyId, xmlData);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error processing surveys: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
 
         private static void CreateTargetTableIfNotExists(string? connectionStringTarget)
         {
@@ -128,7 +121,8 @@ namespace AccessElectionsService.api.Controllers
                                                              "    SurveyID INT, " +
                                                              "    QuestionID INT, " +
                                                              "    QuestionNumber VARCHAR(50), " +
-                                                             "    Answer VARCHAR(MAX) " +
+                                                             "    AnswerID VARCHAR(MAX), " +
+                                                             "    AnswerText VARCHAR(MAX) " +
                                                              ")";
 
 
@@ -144,6 +138,7 @@ namespace AccessElectionsService.api.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error processing : {ex.Message}");
                 throw;
             }
         }
@@ -195,61 +190,107 @@ namespace AccessElectionsService.api.Controllers
         {
             try
             {
-                // Parse XML
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(xmlData);
-                var targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
 
+                string targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
 
-                // Extract data from XML
-                XmlNodeList questionNodes = xmlDoc.SelectNodes("//Question");
-                foreach (XmlNode questionNode in questionNodes)
+                foreach (XmlNode questionNode in xmlDoc.SelectNodes("//Question"))
                 {
                     string questionNumber = questionNode.Attributes["ID"].Value;
-                    string answer = questionNode.SelectSingleNode("Answer").InnerText;
-                    int? questionId = null;
-                    //Insert data into SQL Server
-                    string selectQuestionQuery = "SELECT  [Id] FROM  AE.Question WHERE [QuestionNumber] = @QuestionID";
-                    string insertQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, QuestionNumber, Answer) " +
-                                            "VALUES (@SurveyID, @QuestionID, @QuestionNumber, @Answer)";
+                    string answerText = questionNode.SelectSingleNode("Answer").InnerText;
+                    int? questionId = GetQuestionId(targetConnectionString, questionNumber);
+                    int? answerId = GetAnswerId(targetConnectionString, questionId, answerText);
 
-
-                    using (SqlConnection connection = new SqlConnection(targetConnectionString))
-                    {
-                        connection.Open();
-
-                        using (SqlCommand selectCommand = new SqlCommand(selectQuestionQuery, connection))
-                        {
-                            selectCommand.Parameters.AddWithValue("@QuestionID", questionNumber);
-                            using (SqlDataReader reader = selectCommand.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    // Read data from the database
-                                    questionId = reader.GetInt32(reader.GetOrdinal("Id"));
-                                }
-                            }
-                        }
-                        using (SqlCommand command = new SqlCommand(insertQuery, connection))
-                        {
-
-                            //seperate the surveyId, PollingId, createdDate, ElectionId to a survey table
-                            command.Parameters.AddWithValue("@SurveyID", surveyId);
-                            command.Parameters.AddWithValue("@QuestionID", questionId == null ? DBNull.Value : questionId);
-                            command.Parameters.AddWithValue("@QuestionNumber", questionNumber);
-                            command.Parameters.AddWithValue("@Answer", answer);
-
-                            command.ExecuteNonQuery();
-                        }
-                    }
+                    InsertResponseResult(targetConnectionString, surveyId, questionId, questionNumber, answerId, answerId == null ? answerText : null);
                 }
             }
             catch (Exception ex)
             {
-                // Handle parsing or insertion errors
                 Console.WriteLine($"Error processing survey with SurveyID {surveyId}: {ex.Message}");
             }
         }
+
+        private int? GetAnswerId(string connectionString, int? questionId, string answerText)
+        {
+            if (!questionId.HasValue)
+            {
+                return null;
+            }
+
+            string selectAnswerQuery = "SELECT ID FROM AE.QuestionAnswer WHERE QuestionID = @QuestionID AND QuestionAnswerText = @AnswerText";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand selectCommand = new SqlCommand(selectAnswerQuery, connection))
+                {
+                    var cmdText = selectCommand.CommandText;
+                    selectCommand.Parameters.AddWithValue("@QuestionID", questionId.Value);
+                    selectCommand.Parameters.AddWithValue("@AnswerText", answerText);
+
+                    using (SqlDataReader reader = selectCommand.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return reader.GetInt32(reader.GetOrdinal("ID"));
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+
+        private int? GetQuestionId(string connectionString, string questionNumber)
+        {
+            string selectQuestionQuery = "SELECT [Id] FROM AE.Question WHERE [QuestionNumber] = @QuestionID";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand selectCommand = new SqlCommand(selectQuestionQuery, connection))
+                {
+                    selectCommand.Parameters.AddWithValue("@QuestionID", questionNumber);
+
+                    using (SqlDataReader reader = selectCommand.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return reader.GetInt32(reader.GetOrdinal("Id"));
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private void InsertResponseResult(string connectionString, int surveyId, int? questionId, string questionNumber,int? answerId, string? answerText)
+        {
+            string insertQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, QuestionNumber, AnswerID, AnswerText) " +
+                                 "VALUES (@SurveyID, @QuestionID, @QuestionNumber, @AnswerID, @AnswerText)";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand(insertQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@SurveyID", surveyId);
+                    command.Parameters.AddWithValue("@QuestionID", questionId == null ? DBNull.Value : questionId);
+                    command.Parameters.AddWithValue("@QuestionNumber", questionNumber);
+                    command.Parameters.AddWithValue("@AnswerID", answerId == null ? DBNull.Value : answerId);
+                    command.Parameters.AddWithValue("@AnswerText", answerText == null ? DBNull.Value : answerText);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
 
         private void GetRestoreTableDbNames()
         {
@@ -368,7 +409,7 @@ namespace AccessElectionsService.api.Controllers
                                             if (ex.Number == 2627 || ex.Number == 2601)
                                             {
                                                 // SQL Server error numbers for unique constraint violation
-                                                //Console.WriteLine($"Skipped duplicate record for {tableName} with Primary Key: {reader["PollingPlacePhotoUID"]}");
+                                                Console.WriteLine($"Skipped duplicate record for {tableName}");
                                             }
                                             else
                                             {
@@ -454,7 +495,6 @@ namespace AccessElectionsService.api.Controllers
                     // Execute the restore command
                     command.ExecuteNonQuery();
                 }
-
                 Console.WriteLine($"Database '{_restoreDbName}' restored successfully.");
                 connection.Close();
             }
