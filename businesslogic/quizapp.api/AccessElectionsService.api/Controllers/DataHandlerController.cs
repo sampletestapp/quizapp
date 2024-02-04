@@ -29,7 +29,7 @@ namespace AccessElectionsService.api.Controllers
                 RestoreDbFromBackUp(dataHandler.backupFilePath);
                 CopyDataToTarget();
                 //Read only from temp
-                ProcessSurveys(dataHandler.elecyiionId);
+                ProcessSurveys(dataHandler.electionId);
                 RemoveTheTempDb();
                 return Ok("Data copy process completed.");
             }
@@ -111,7 +111,7 @@ namespace AccessElectionsService.api.Controllers
             return records;
         }
 
-        private IActionResult ProcessSurveys(int elecyiionId)
+        private IActionResult ProcessSurveys(int electionId)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace AccessElectionsService.api.Controllers
                     {
                         using (SqlDataReader reader = selectCommand.ExecuteReader())
                         {
-                            ProcessSurveyData(reader, elecyiionId);
+                            ProcessSurveyData(reader, electionId);
                         }
                     }
                 }
