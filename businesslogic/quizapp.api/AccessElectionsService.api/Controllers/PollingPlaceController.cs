@@ -1,43 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AccessElectionsService.api.Models;
-using AccessElectionsService.api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using System.Text;
+using System.Data;
 
 namespace AccessElectionsService.api.Controllers
 {
     public class PollingPlaceController : ControllerBase
     {
-        private readonly IPollingPlaceService _pollingPlaceService;
+        private readonly IConfiguration _configuration;
 
-        public PollingPlaceController(IPollingPlaceService pollingPlaceService)
+        public PollingPlaceController(IConfiguration configuration)
         {
-            _pollingPlaceService = pollingPlaceService;                 
+            _configuration = configuration;
         }
 
+
         [HttpGet]
-        public async Task<ActionResult<string>> GetPollingPlaceDetails(PollingPlaceDto PollingPlaceDTO)
+        public async Task<ActionResult<string>> GetPollingPlaceDetails(PollingPlaceDto pollingPlaceDTO)
         {
             string pollingPlaceDetails = string.Empty;
             List<string> PPLocations = new List<string>();
             StringBuilder fileContent = new StringBuilder();
+            var connectionString = _configuration.GetConnectionString("DataTargetConnection");
 
-
-            //try
-            //{
-            //    var createdQuestion = await _pollingPlaceService.CreateQuestion(questionDto);
-            //    return CreatedAtAction(nameof(GetQuestion), new { id = createdQuestion.Id }, createdQuestion);
-            //}
-            //catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, out var errorCode))
-            //{
-            //    return HandleUniqueConstraintViolation(errorCode, questionDto);
-            //}
-
-
-
-
-            //string PollingPlaceIds = "6CAE9DC6-16DF-E911-8112-0050568C77F8, 6E26E6F9-16DF-E911-8112-0050568C77F8, 71516D1C-17DF-E911-8112-0050568C77F8, CA9897D0-17DF-E911-8112-0050568C77F8";
             try
             {
 
@@ -58,126 +45,115 @@ namespace AccessElectionsService.api.Controllers
                 fileContent.Append("VALUES");
 
 
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    sqlConnection.Open();
+
+                    using (SqlCommand sqlCommand = new SqlCommand("PrGetPollingPlaceDetails", sqlConnection))
+                    {
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
+                        sqlCommand.Parameters.AddWithValue("@PollingPlaceIds", pollingPlaceDTO.PollingPlaceIds);
+                        using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                        {
+                            if (reader != null)
+                            {
+                                while (reader.Read())
+                                {
+                                    fileContent.Append(System.Environment.NewLine);
+                                    fileContent.Append("(");
+                                    fileContent.Append("'" + reader["Description"].ToString().Replace("'", "\''") + "',");
+                                    fileContent.Append(reader["Hindi"] + ",");
+                                    fileContent.Append("'" + reader["StatusCode"] + "',");
+                                    fileContent.Append("'" + reader["AddressLine1"].ToString().Replace("'", "\''") + "',");
+                                    fileContent.Append("'" + reader["City"].ToString().Replace("'", "\''") + "',");
+                                    fileContent.Append("'" + reader["StateCode"].ToString().Replace("'", "\''") + "',");
+                                    fileContent.Append(reader["PostalCode"] + ",");
+                                    fileContent.Append(reader["CountyID"] + ",");
+                                    fileContent.Append("'" + reader["County"].ToString().Replace("'", "\''") + "',");
+                                    fileContent.Append(reader["MunicipalityID"] + ",");
+                                    fileContent.Append("'" + reader["Municipality"].ToString().Replace("'", "\''") + "',");
+                                    fileContent.Append(reader["Latitude"] + ",");
+                                    fileContent.Append(reader["Longitude"] + ",");
+                                    fileContent.Append(reader["LastModifiedOn"] + ",");
+                                    fileContent.Append(reader["CreatedOn"] + ",");
+                                    fileContent.Append("'" + reader["BldgClassificationCode"].ToString().Replace("'", "\''") + "',");
+                                    fileContent.Append(reader["PollingPlaceCategoryId"].ToString().Replace("'", "\''") + ",");
+                                    fileContent.Append(reader["PPLID"] + "),");
+                                    PPLocations.Add(reader["PPLID"].ToString());
+                                }
+                            }
+                            fileContent.Append(")");
+                        }
+                        fileContent.Replace("()", "");
+                        fileContent.Length = fileContent.Length - 2;
+                    }
+                }
+
+                fileContent.Append(System.Environment.NewLine);
+                fileContent.Append("INSERT INTO SVRS_PollingPlaceUser").Append(System.Environment.NewLine);
+                fileContent.Append("(PPLID, UserId)").Append(System.Environment.NewLine);
+                fileContent.Append("VALUES").Append(System.Environment.NewLine);
+
+                foreach (string location in PPLocations)
+                {
+                    fileContent.Append("(" + location + ",3992),").Append(System.Environment.NewLine);
+                }
+                fileContent.Length = fileContent.Length - 3;
+                string filePath = string.Empty;
 
 
-                //using (SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["EDM_MSCRM_EXTConnectionString"].ConnectionString))
-                //{
-                //    sqlConnection.Open();
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    sqlConnection.Open();
 
-                //    using (SqlCommand sqlCommand = new SqlCommand("PrGetPollingPlaceDetails", sqlConnection))
-                //    {
-                //        sqlCommand.CommandType = CommandType.StoredProcedure;
-                //        sqlCommand.Parameters.AddWithValue("@PollingPlaceIds", PollingPlaceIds);
-                //        using (SqlDataReader reader = sqlCommand.ExecuteReader())
-                //        {
-                //            if (reader != null)
-                //            {
-                //                while (reader.Read())
-                //                {
-                //                    fileContent.Append(System.Environment.NewLine);
-                //                    fileContent.Append("(");
-                //                    fileContent.Append("'" + reader["Description"].ToString().Replace("'", "\''") + "',");
-                //                    fileContent.Append(reader["Hindi"] + ",");
-                //                    fileContent.Append("'" + reader["StatusCode"] + "',");
-                //                    fileContent.Append("'" + reader["AddressLine1"].ToString().Replace("'", "\''") + "',");
-                //                    fileContent.Append("'" + reader["City"].ToString().Replace("'", "\''") + "',");
-                //                    fileContent.Append("'" + reader["StateCode"].ToString().Replace("'", "\''") + "',");
-                //                    fileContent.Append(reader["PostalCode"] + ",");
-                //                    fileContent.Append(reader["CountyID"] + ",");
-                //                    fileContent.Append("'" + reader["County"].ToString().Replace("'", "\''") + "',");
-                //                    fileContent.Append(reader["MunicipalityID"] + ",");
-                //                    fileContent.Append("'" + reader["Municipality"].ToString().Replace("'", "\''") + "',");
-                //                    fileContent.Append(reader["Latitude"] + ",");
-                //                    fileContent.Append(reader["Longitude"] + ",");
-                //                    fileContent.Append(reader["LastModifiedOn"] + ",");
-                //                    fileContent.Append(reader["CreatedOn"] + ",");
-                //                    fileContent.Append("'" + reader["BldgClassificationCode"].ToString().Replace("'", "\''") + "',");
-                //                    fileContent.Append(reader["PollingPlaceCategoryId"].ToString().Replace("'", "\''") + ",");
-                //                    fileContent.Append(reader["PPLID"] + "),");
-                //                    PPLocations.Add(reader["PPLID"].ToString());
-                //                }
-                //            }
-                //            fileContent.Append(")");
-                //        }
-                //        fileContent.Replace("()", "");
-                //        fileContent.Length = fileContent.Length - 2;
-                //    }
-                //}
+                    // Inserting polling place survey record
+                    string insertSurveyQuery = @"INSERT INTO edm_pollingplacesurvey (edm_ElectionId, edm_ExportedOn, edm_ExportedSQL, edm_ExportedBy)
+                                     VALUES (@ElectionId, @ExportedOn, @ExportedSQL, @ExportedBy);
+                                     SELECT SCOPE_IDENTITY();";
 
-            //    fileContent.Append(System.Environment.NewLine);
-            //    fileContent.Append("INSERT INTO SVRS_PollingPlaceUser").Append(System.Environment.NewLine);
-            //    fileContent.Append("(PPLID, UserId)").Append(System.Environment.NewLine);
-            //    fileContent.Append("VALUES").Append(System.Environment.NewLine);
+                    using (SqlCommand sqlCommand = new SqlCommand(insertSurveyQuery, sqlConnection))
+                    {
+                        sqlCommand.Parameters.AddWithValue("@ElectionId", new Guid(pollingPlaceDTO.ElectionId));
+                        sqlCommand.Parameters.AddWithValue("@ExportedOn", DateTime.Now);
+                        sqlCommand.Parameters.AddWithValue("@ExportedSQL", fileContent.ToString());
+                        sqlCommand.Parameters.AddWithValue("@ExportedBy", new Guid(pollingPlaceDTO.UserId));
 
-            //    foreach (string location in PPLocations)
-            //    {
-            //        fileContent.Append("(" + location + ",3992),").Append(System.Environment.NewLine);
-            //    }
-            //    fileContent.Length = fileContent.Length - 3;
-            //    string filePath = string.Empty;
+                        // Get the inserted survey record's ID
+                        int surveyId = Convert.ToInt32(sqlCommand.ExecuteScalar());
 
+                        // Inserting polling place survey response records
+                        string[] pollingPlaces = pollingPlaceDTO.PollingPlaceIds.Split(',');
+                        foreach (string pp in pollingPlaces)
+                        {
+                            string insertResponseQuery = @"INSERT INTO edm_pollingplacesurveyresponse (edm_name, edm_PollingPlaceSurveyId, edm_PollingPlaceId)
+                                               VALUES (@Name, @SurveyId, @PollingPlaceId);";
 
-            //    using (var xContext = new XrmServiceContext(new CrmUtilities().CrmService))
-            //    {
-            //        edm_elections election = (from e in xContext.edm_electionsSet where e.edm_electionsId == new Guid(ElectionId) select e).FirstOrDefault();
+                            using (SqlCommand responseCommand = new SqlCommand(insertResponseQuery, sqlConnection))
+                            {
+                                // Fetching polling place details
+                                string selectPlaceQuery = "SELECT edm_name FROM edm_pollingplacelocations WHERE edm_pollingplacelocationsId = @PollingPlaceId;";
+                                using (SqlCommand selectCommand = new SqlCommand(selectPlaceQuery, sqlConnection))
+                                {
+                                    selectCommand.Parameters.AddWithValue("@PollingPlaceId", new Guid(pp));
+                                    string pollingPlaceName = selectCommand.ExecuteScalar().ToString();
 
-            //        edm_pollingplacesurvey pplsurvey = new edm_pollingplacesurvey();
-            //        pplsurvey.edm_ElectionId = new Microsoft.Xrm.Sdk.EntityReference(edm_elections.EntityLogicalName, new Guid(ElectionId));
-            //        pplsurvey.edm_ExportedOn = DateTime.Now;
-            //        pplsurvey.edm_ExportedSQL = fileContent.ToString();
-            //        pplsurvey.edm_ExportedBy = new Microsoft.Xrm.Sdk.EntityReference(SystemUser.EntityLogicalName, new Guid(UserId));
-            //        xContext.AddObject(pplsurvey);
-            //        xContext.SaveChanges();
+                                    responseCommand.Parameters.AddWithValue("@Name", electionName + " - " + pollingPlaceName);
+                                    responseCommand.Parameters.AddWithValue("@SurveyId", surveyId);
+                                    responseCommand.Parameters.AddWithValue("@PollingPlaceId", new Guid(pp));
 
-
-            //        string[] pollingPlaces = PollingPlaceIds.Split(',');
-            //        foreach (string pp in pollingPlaces)
-            //        {
-            //            edm_pollingplacelocations pollingplacelocation = (from ppl in xContext.edm_pollingplacelocationsSet
-            //                                                              where ppl.edm_pollingplacelocationsId == new Guid(pp)
-            //                                                              select ppl).FirstOrDefault();
-
-            //            edm_pollingplacesurveyresponse pplsurveyresponse = new edm_pollingplacesurveyresponse();
-            //            pplsurveyresponse.edm_name = election.edm_name + " - " + pollingplacelocation.edm_name;
-            //            pplsurveyresponse.edm_PollingPlaceSurveyId = new Microsoft.Xrm.Sdk.EntityReference(edm_pollingplacesurvey.EntityLogicalName, pplsurvey.Id);
-            //            pplsurveyresponse.edm_PollingPlaceId = new Microsoft.Xrm.Sdk.EntityReference(edm_pollingplacelocations.EntityLogicalName, new Guid(pp));
-
-
-            //            //AssignRequest assignReq = new AssignRequest()
-            //            //{
-            //            //    Assignee = new EntityReference
-            //            //    {
-            //            //        LogicalName = edm_pollingplacesurveyresponse.EntityLogicalName,
-            //            //        Id = assigneeID
-            //            //    },
-            //            //    Target = new EntityReference(TargetEntityName, TargetID)
-            //            //}; 
-
-            //            //xContext.Execute(assignReq);
-
-            //            //if (pollingplacelocation.OwnerId != null)
-            //            //    pplsurveyresponse.OwnerId = new EntityReference();
-            //            //    pplsurveyresponse.OwnerId = pollingplacelocation.OwningTeam;
-            //            //    pplsurveyresponse.OwnerId.LogicalName = Team.EntityLogicalName;
-            //            //pplsurveyresponse.OwnerId = pollingplacelocation.OwnerId;
-
-            //            xContext.AddObject(pplsurveyresponse);
-            //            xContext.SaveChanges();
-
-            //            //This is to assign the owner of the polling place survey
-            //            //VoterBLL.AssignRequest(xContext, Team.EntityLogicalName, pollingplacelocation.OwningTeam.Id, edm_pollingplacesurveyresponse.EntityLogicalName, pplsurveyresponse.Id);
-
-
-            //        }
-            //    }
+                                    responseCommand.ExecuteNonQuery();
+                                }
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 //LogBLL.SendEmailTemp("PPL Export Request :" + ex.Message);
             }
 
-            //return fileContent.ToString();
-            return pollingPlaceDetails;
+            return fileContent.ToString();
         }
     }
 }
