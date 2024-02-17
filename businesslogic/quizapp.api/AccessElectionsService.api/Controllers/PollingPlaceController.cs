@@ -136,11 +136,17 @@ namespace AccessElectionsService.api.Controllers
                                 {
                                     selectCommand.Parameters.AddWithValue("@PollingPlaceId", new Guid(pp));
                                     string pollingPlaceName = selectCommand.ExecuteScalar().ToString();
+                                    string selectElectionNameQuery = "SELECT edm_name FROM edm_pollingplacelocations WHERE edm_pollingplacelocationsId = @ElectionId;";
 
-                                    responseCommand.Parameters.AddWithValue("@Name", electionName + " - " + pollingPlaceName);
-                                    responseCommand.Parameters.AddWithValue("@SurveyId", surveyId);
-                                    responseCommand.Parameters.AddWithValue("@PollingPlaceId", new Guid(pp));
+                                    using (SqlCommand selectElectionCommandCommand = new SqlCommand(selectPlaceQuery, sqlConnection))
+                                    {
+                                        selectElectionCommandCommand.Parameters.AddWithValue("@ElectionId", new Guid(pollingPlaceDTO.ElectionId));
+                                        string electionName = selectElectionCommandCommand.ExecuteScalar().ToString();
 
+                                        responseCommand.Parameters.AddWithValue("@Name", electionName + " - " + pollingPlaceName);
+                                        responseCommand.Parameters.AddWithValue("@SurveyId", surveyId);
+                                        responseCommand.Parameters.AddWithValue("@PollingPlaceId", new Guid(pp));
+                                    }
                                     responseCommand.ExecuteNonQuery();
                                 }
                             }

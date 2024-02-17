@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey Data</title>
+<link rel="stylesheet" href="AccessElectionSurveyResponseList.css">
+</head>
+<body>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Survey ID</th>
+      <th>Question ID</th>
+      <th>Question Number</th>
+      <th>Answer ID</th>
+      <th>Answer Text</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="survey-data">
+  </tbody>
+</table>
+<!-- Modal for editing records -->
+<div id="edit-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeEditModal()">&times;</span>
+    <h2>Edit Record</h2>
+    <p>Question Number: <span id="question-number"></span></p>
+    <p>Answer:</p>
+    <textarea id="answer" rows="4" cols="50"></textarea>
+    <button onclick="saveRecord()">Save</button>
+  </div>
+</div>
+<script src="AccessElectionSurveyResponseList.js">
+</script>
+</body>
+</html>
