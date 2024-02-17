@@ -1,6 +1,9 @@
 let data = []; // Declare data outside the fetch chain
+function fetchData() {
+  const pplid = $('#pplid').val();
+  const electionid = $('#electionid').val();
 
-fetch('http://localhost:5253/api/DataHandler/get-records?PPLID=70002709&ElectionID=123')
+  fetch(`http://localhost:5253/api/DataHandler/get-records?PPLID=${pplid}&ElectionID=${electionid}`)
   .then(response => response.json())
   .then(apiData => {
     data = apiData; // Populate data with the fetched API data
@@ -24,6 +27,7 @@ fetch('http://localhost:5253/api/DataHandler/get-records?PPLID=70002709&Election
     console.error('Error fetching data:', error);
   });
 
+}
 let currentRecord = null;
 
 function editRecord(id) {
@@ -122,10 +126,6 @@ function saveRecord() {
   // Update the currentRecord with the selected answer ID based on the question type
   var questionInputs = document.getElementsByName('answer');
   if (questionInputs.length > 0) {
-    // if (questionInputs[0].type === 'radio') { // Single selection
-    //   var selectedAnswer = Array.from(questionInputs).find(input => input.checked);
-    //   currentRecord.answerID = selectedAnswer ? parseInt(selectedAnswer.value) : null;
-    // } else if (questionInputs[0].type === 'checkbox') { // Multiple selection
     var selectedAnswers = Array.from(questionInputs)
       .filter(input => input.checked)
       .map(input => parseInt(input.value));
