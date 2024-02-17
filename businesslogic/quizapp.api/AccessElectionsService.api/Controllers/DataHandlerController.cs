@@ -207,7 +207,7 @@ namespace AccessElectionsService.api.Controllers
                         using (SqlCommand updateCommand = new SqlCommand(updateRecordQuery, connection))
                         {
                             updateCommand.Parameters.AddWithValue("@Id", updatedRecord.Id);
-                            updateCommand.Parameters.AddWithValue("@AnswerID", updatedRecord.AnswerID.FirstOrDefault() ?? (object)DBNull.Value);
+                            updateCommand.Parameters.AddWithValue("@AnswerID", updatedRecord.AnswerID?.FirstOrDefault() ?? (object)DBNull.Value);
                             updateCommand.Parameters.AddWithValue("@AnswerText", string.IsNullOrEmpty(updatedRecord.AnswerText) ? (object)DBNull.Value : updatedRecord.AnswerText);
 
                             updateCommand.ExecuteNonQuery();
