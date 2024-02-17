@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Xml;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace AccessElectionsService.api.Controllers
 {
@@ -109,6 +110,154 @@ namespace AccessElectionsService.api.Controllers
             }
 
             return records;
+        }
+
+
+        [HttpGet("get-answer-ids")]
+        public IActionResult GetAnswerIds(int questionId)
+        {
+            try
+            {
+                string targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+
+                List<int?> answerIds = RetrieveAnswerIds(targetConnectionString, questionId);
+
+                return Ok(answerIds);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        private List<int?> RetrieveAnswerIds(string connectionString, int questionId)
+        {
+            List<int?> answerIds = new List<int?>();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string selectAnswerIdsQuery = @"
+                        SELECT AnswerID
+                        FROM AE.ResponseResults
+                        WHERE QuestionID = @QuestionID";
+
+                    using (SqlCommand selectCommand = new SqlCommand(selectAnswerIdsQuery, connection))
+                    {
+                        selectCommand.Parameters.AddWithValue("@QuestionID", questionId);
+
+                        using (SqlDataReader reader = selectCommand.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                int? answerId = reader.IsDBNull(reader.GetOrdinal("AnswerID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("AnswerID"));
+                                answerIds.Add(answerId);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine($"Error retrieving answer IDs: {ex.Message}");
+            }
+
+            return answerIds;
+        }
+
+
+        [HttpPost("update-questionanswer")]
+        public IActionResult UpdateQuestionAnswer([FromBody] UpdateResponseResultModel updatedRecord)
+        {
+            try
+            {
+                string targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+
+                // Update the record in the database using the updatedRecord object
+                UpdateRecord(targetConnectionString, updatedRecord);
+
+                return Ok("Record saved successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        private void UpdateRecord(string connectionString, UpdateResponseResultModel updatedRecord)
+        {
+            try
+            {
+                var questionType = GetQuestionType(connectionString,updatedRecord.QuestionNumber);
+                if (questionType!=3)
+                {
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        string updateRecordQuery = @"
+                                        UPDATE AE.ResponseResults
+                                        SET AnswerID = @AnswerID, AnswerText = @AnswerText
+                                        WHERE Id = @Id";
+
+                        using (SqlCommand updateCommand = new SqlCommand(updateRecordQuery, connection))
+                        {
+                            updateCommand.Parameters.AddWithValue("@Id", updatedRecord.Id);
+                            updateCommand.Parameters.AddWithValue("@AnswerID", updatedRecord.AnswerID.FirstOrDefault() ?? (object)DBNull.Value);
+                            updateCommand.Parameters.AddWithValue("@AnswerText", string.IsNullOrEmpty(updatedRecord.AnswerText) ? (object)DBNull.Value : updatedRecord.AnswerText);
+
+                            updateCommand.ExecuteNonQuery();
+                        }
+                    } 
+                }
+                else
+                {
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        string deleteRecordsQuery = @"
+                        DELETE FROM AE.ResponseResults
+                        WHERE QuestionID = @QuestionID";
+
+                        using (SqlCommand deleteCommand = new SqlCommand(deleteRecordsQuery, connection))
+                        {
+                            deleteCommand.Parameters.AddWithValue("@QuestionID", updatedRecord.QuestionID);
+
+                            deleteCommand.ExecuteNonQuery();
+                        }
+
+                        // Insert new records
+                        // Assuming you have a list of new records to insert
+                        foreach (var answerId in updatedRecord.AnswerID)
+                        {
+                            string insertRecordQuery = @"
+                            INSERT INTO AE.ResponseResults (SurveyID, QuestionID, AnswerID,QuestionNumber, AnswerText)
+                            VALUES (@SurveyID, @QuestionID, @AnswerID,@QuestionNumber, @AnswerText)";
+
+                            using (SqlCommand insertCommand = new SqlCommand(insertRecordQuery, connection))
+                            {
+                                insertCommand.Parameters.AddWithValue("@SurveyID", updatedRecord.SurveyID);
+                                insertCommand.Parameters.AddWithValue("@QuestionID", updatedRecord.QuestionID);
+                                insertCommand.Parameters.AddWithValue("@AnswerID", answerId ?? (object)DBNull.Value);
+                                insertCommand.Parameters.AddWithValue("@QuestionNumber", updatedRecord.QuestionNumber);
+                                insertCommand.Parameters.AddWithValue("@AnswerText", string.IsNullOrEmpty(updatedRecord.AnswerText) ? (object)DBNull.Value : updatedRecord.AnswerText);
+
+                                insertCommand.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine($"Error updating record: {ex.Message}");
+            }
         }
 
         private IActionResult ProcessSurveys(int electionId)
@@ -336,6 +485,31 @@ namespace AccessElectionsService.api.Controllers
                         if (reader.Read())
                         {
                             return reader.GetInt32(reader.GetOrdinal("Id"));
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private int? GetQuestionType(string connectionString, string questionNumber)
+        {
+            string selectQuestionQuery = "SELECT [QuestionTypeId] FROM AE.Question WHERE [QuestionNumber] = @QuestionID";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand selectCommand = new SqlCommand(selectQuestionQuery, connection))
+                {
+                    selectCommand.Parameters.AddWithValue("@QuestionID", questionNumber);
+
+                    using (SqlDataReader reader = selectCommand.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return reader.GetInt32(reader.GetOrdinal("QuestionTypeId"));
                         }
                     }
                 }

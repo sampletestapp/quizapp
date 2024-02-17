@@ -37,6 +37,16 @@ namespace AccessElectionsService.api.Repositories
             #pragma warning restore CS8603 // Possible null reference return.
         }
 
+        public async Task<QuestionAnswer> GetAnswersByQuestionId(int id)
+        {
+           #pragma warning disable CS8603 // Possible null reference return.
+            var result =  await _dbContext.Answers
+                .Where(a => a.QuestionId == id).ToListAsync();
+            return await _dbContext.Answers
+                .FirstOrDefaultAsync(a => a.QuestionId == id);
+#pragma warning restore CS8603 // Possible null reference return.
+        }
+
         public async Task CreateQuestion(Question question)
         {
             await _dbContext.Questions.AddAsync(question);

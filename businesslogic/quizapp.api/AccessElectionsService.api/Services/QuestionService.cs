@@ -27,6 +27,12 @@ namespace AccessElectionsService.api.Services
             return MapQuestionToDto(question);
         }
 
+        public async Task<QuestionAnswerDto> GetAnswersByQuestionId(int id)
+        {
+            var answer = await _questionRepository.GetAnswersByQuestionId(id);
+            return MapAnswerToDto(answer);
+        }
+
         public async Task<QuestionDto> CreateQuestion(QuestionDto questionDto)
         {
             var question = _mapper.Map<Question>(questionDto);
@@ -121,6 +127,16 @@ namespace AccessElectionsService.api.Services
         private Question MapDtoToQuestion(QuestionDto questionDto)
         {
             return _mapper.Map<Question>(questionDto);
+        }
+
+        private QuestionAnswerDto MapAnswerToDto(QuestionAnswer question)
+        {
+            return _mapper.Map<QuestionAnswerDto>(question);
+        }
+
+        private QuestionAnswer MapDtoToAnswer(QuestionAnswerDto questionDto)
+        {
+            return _mapper.Map<QuestionAnswer>(questionDto);
         }
     }
 }

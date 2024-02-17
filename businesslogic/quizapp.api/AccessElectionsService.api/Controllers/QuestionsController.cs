@@ -39,6 +39,19 @@ namespace AccessElectionsService.api.Controllers
             return Ok(question);
         }
 
+        [HttpGet("get-answers")]
+        public async Task<ActionResult<QuestionDto>> GetQuestionAnswers(int id)
+        {
+            var question = await _questionService.GetAnswersByQuestionId(id);
+
+            if (question == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(question);
+        }
+
         // POST: api/questions
         [HttpPost]
         public async Task<ActionResult<QuestionDto>> CreateQuestion(QuestionDto questionDto)
