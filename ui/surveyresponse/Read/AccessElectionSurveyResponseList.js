@@ -30,6 +30,17 @@ function editRecord(id) {
   // Find the record in the data array
   currentRecord = data.find(item => item.id === id);
 
+  $.ajax({
+    url: 'http://localhost:5253/api/Questions/' +  currentRecord.questionID,
+    type: 'GET',
+    success: function (questionDetails) {
+       console.log(questionDetails)
+    },
+    error: function (error) {
+        console.error('Error fetching question details', error);
+    }
+  });
+
   // Open the modal and populate the data
   document.getElementById('edit-modal').style.display = 'block';
   document.getElementById('question-number').textContent = currentRecord.questionNumber;
