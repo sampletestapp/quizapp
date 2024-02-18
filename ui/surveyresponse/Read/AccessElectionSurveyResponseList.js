@@ -1,7 +1,8 @@
 let data = []; // Declare data outside the fetch chain
-function fetchData() {
-  const pplid = $('#pplid').val();
-  const electionid = $('#electionid').val();
+document.addEventListener('DOMContentLoaded', function() {
+  var urlParams = new URLSearchParams(window.location.search);
+  var pplid = urlParams.get('pplId');
+  var electionid = urlParams.get('electionId');
 
   fetch(`http://localhost:5253/api/DataHandler/get-records?PPLID=${pplid}&ElectionID=${electionid}`)
   .then(response => response.json())
@@ -27,7 +28,7 @@ function fetchData() {
     console.error('Error fetching data:', error);
   });
 
-}
+});
 let currentRecord = null;
 
 function editRecord(id) {

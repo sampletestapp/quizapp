@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Data</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="Read/AccessElectionSurveyResponseList.css">
+</head>
+
+<body>
+    <label for="pplid">PPLID:</label>
+    <input type="text" id="pplid" name="pplid">
+    <label for="electionid">ElectionID:</label>
+    <input type="text" id="electionid" name="electionid">
+    <button onclick="search()">Submit</button>
+    <script>
+        function search() {
+            var pplId = document.getElementById('pplid').value;
+            var electionId = document.getElementById('electionid').value;
+            window.location.href = 'Read/AccessElectionSurveyResponseList.html?pplId=' + pplId + '&electionId=' + electionId;
+        }
+    </script>
+</body>
+
+</html>
