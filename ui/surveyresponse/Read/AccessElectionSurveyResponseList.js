@@ -1,34 +1,41 @@
+const getDataUrl = 'http://localhost:5253/api/DataHandler/get-records';
+const getQuestionUrl = 'http://localhost:5253/api/Questions/';
+const getAnswerIdsUrl = 'http://localhost:5253/api/DataHandler/get-answer-ids';
+const updateRecordUrl = 'http://localhost:5253/api/DataHandler/update-questionanswer';
+
 let data = []; // Declare data outside the fetch chain
+
 document.addEventListener('DOMContentLoaded', function() {
   var urlParams = new URLSearchParams(window.location.search);
   var pplid = urlParams.get('pplId');
   var electionid = urlParams.get('electionId');
 
-  fetch(`http://localhost:5253/api/DataHandler/get-records?PPLID=${pplid}&ElectionID=${electionid}`)
-  .then(response => response.json())
-  .then(apiData => {
-    data = apiData; // Populate data with the fetched API data
-    const tbody = document.getElementById('survey-data');
+  fetch(`${getDataUrl}?PPLID=${pplid}&ElectionID=${electionid}`)
+    .then(response => response.json())
+    .then(apiData => {
+      data = apiData; // Populate data with the fetched API data
+      const tbody = document.getElementById('survey-data');
 
-    data.forEach(item => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${item.id}</td>
-        <td>${item.surveyID}</td>
-        <td>${item.questionID}</td>
-        <td>${item.questionNumber}</td>
-        <td>${item.answerID !== null ? item.answerID : '-'}</td>
-        <td>${item.answerText !== null ? item.answerText : '-'}</td>
-        <td><button class="edit-button" onclick="editRecord(${item.id})">Edit</button></td>
-      `;
-      tbody.appendChild(row);
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.surveyID}</td>
+          <td>${item.questionID}</td>
+          <td>${item.questionNumber}</td>
+          <td>${item.answerID !== null ? item.answerID : '-'}</td>
+          <td>${item.answerText !== null ? item.answerText : '-'}</td>
+          <td><button class="edit-button" onclick="editRecord(${item.id})">Edit</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
     });
-  })
-  .catch(error => {
-    console.error('Error fetching data:', error);
-  });
 
 });
+
 let currentRecord = null;
 
 function editRecord(id) {
@@ -37,7 +44,7 @@ function editRecord(id) {
 
   // Make AJAX call to fetch question details
   $.ajax({
-    url: 'http://localhost:5253/api/Questions/' + currentRecord.questionID,
+    url: `${getQuestionUrl}${currentRecord.questionID}`,
     type: 'GET',
     success: function (questionDetails) {
       // Show or hide the answer text area based on the answer ID
@@ -76,7 +83,7 @@ function editRecord(id) {
         });
       } else if (questionDetails.questionTypeId === 3) { // Multiple selection
         $.ajax({
-          url: 'http://localhost:5253/api/DataHandler/get-answer-ids?questionId=' + currentRecord.questionID,
+          url: `${getAnswerIdsUrl}?questionId=${currentRecord.questionID}`,
           type: 'GET',
           success: function (answerIds) {
             var answerIdsArray = Array.isArray(answerIds) ? answerIds : [answerIds]; // Ensure answerIds is an array
@@ -135,7 +142,7 @@ function saveRecord() {
   }
   console.log(currentRecord);
   $.ajax({
-    url: 'http://localhost:5253/api/DataHandler/update-questionanswer',
+    url: updateRecordUrl,
     type: 'POST',
     contentType: 'application/json',
     data: JSON.stringify(currentRecord),
@@ -149,4 +156,3 @@ function saveRecord() {
     }
   });
 }
-
