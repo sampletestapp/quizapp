@@ -19,12 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
       data.forEach(item => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${item.id}</td>
+        <!-- <td>${item.id}</td>-->
           <td>${item.surveyID}</td>
-          <td>${item.questionID}</td>
+          <!-- <td>${item.questionID}</td>-->
           <td>${item.questionNumber}</td>
-          <td>${item.answerID !== null ? item.answerID : '-'}</td>
-          <td>${item.answerText !== null ? item.answerText : '-'}</td>
+          <!-- <td>${item.answerID !== null ? item.answerID : '-'}</td>-->
+          <td>${item.questionAnswerText !== null ? item.questionAnswerText : '-'}</td>
+          <td>${item.answerAddon !== null ? item.answerAddon : '-'}</td>
           <td><button class="edit-button" onclick="editRecord(${item.id})">Edit</button></td>
         `;
         tbody.appendChild(row);

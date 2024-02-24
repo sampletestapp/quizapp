@@ -1,0 +1,8 @@
+1. ACtive directory login- we have code which should be reused
+2. two types of accounts- state, county
+3. drop down of elections list based on role
+4. when a election is selected we should show associated surveys
+5. table grid should have filtering
+6. after selecting the survey, we get the survey data, we should show the survey responses
+7. all the survey respnses should be shown whrer we have complinace as no
+8. instead of question numebr we should have question answer

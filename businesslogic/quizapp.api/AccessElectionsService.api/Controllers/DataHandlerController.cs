@@ -71,9 +71,10 @@ namespace AccessElectionsService.api.Controllers
                     connection.Open();
 
                     string selectRecordsQuery = @"
-                                                SELECT rr.*
+                                                SELECT rr.*, qa.QuestionAnswerText as QuestionAnswerText
                                                 FROM AE.ResponseResults rr
                                                 INNER JOIN AE.Survey s ON rr.SurveyID = s.ID
+                                                LEFT JOIN AE.QuestionAnswer qa ON rr.AnswerID = qa.Id
                                                 WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
 
 
@@ -94,7 +95,8 @@ namespace AccessElectionsService.api.Controllers
                                     QuestionID = reader.IsDBNull(reader.GetOrdinal("QuestionID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionID")),
                                     QuestionNumber = reader.IsDBNull(reader.GetOrdinal("QuestionNumber")) ? null : reader.GetString(reader.GetOrdinal("QuestionNumber")),
                                     AnswerID = reader.IsDBNull(reader.GetOrdinal("AnswerID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("AnswerID")),
-                                    AnswerText = reader.IsDBNull(reader.GetOrdinal("AnswerText")) ? null : reader.GetString(reader.GetOrdinal("AnswerText"))
+                                    AnswerAddon = reader.IsDBNull(reader.GetOrdinal("AnswerText")) ? null : reader.GetString(reader.GetOrdinal("AnswerText")),
+                                    QuestionAnswerText = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerText"))
                                     //AnswerText = reader.GetString(reader.GetOrdinal("AnswerText"))
                                 };
                                 records.Add(record);

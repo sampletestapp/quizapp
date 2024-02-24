@@ -7,7 +7,8 @@
         public int? QuestionID { get; set; }
         public string? QuestionNumber { get; set; }
         public int? AnswerID { get; set; }
-        public string? AnswerText { get; set; }
+        public string? AnswerAddon { get; set; }
+        public string? QuestionAnswerText { get; set; }
     }
 
     public class UpdateResponseResultModel
