@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Xml;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace AccessElectionsService.api.Controllers
 {
@@ -90,14 +89,13 @@ namespace AccessElectionsService.api.Controllers
                                 // Map data to your model and add to the list
                                 ResponseResultModel record = new ResponseResultModel
                                 {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Id")), // Assuming Id is an integer, adjust accordingly
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")), 
                                     SurveyID = reader.GetInt32(reader.GetOrdinal("SurveyID")),
                                     QuestionID = reader.IsDBNull(reader.GetOrdinal("QuestionID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionID")),
                                     QuestionNumber = reader.IsDBNull(reader.GetOrdinal("QuestionNumber")) ? null : reader.GetString(reader.GetOrdinal("QuestionNumber")),
                                     AnswerID = reader.IsDBNull(reader.GetOrdinal("AnswerID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("AnswerID")),
                                     AnswerAddon = reader.IsDBNull(reader.GetOrdinal("AnswerText")) ? null : reader.GetString(reader.GetOrdinal("AnswerText")),
                                     QuestionAnswerText = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerText"))
-                                    //AnswerText = reader.GetString(reader.GetOrdinal("AnswerText"))
                                 };
                                 records.Add(record);
                             }
@@ -346,7 +344,7 @@ namespace AccessElectionsService.api.Controllers
                                                              "    SurveyID INT, " +
                                                              "    QuestionID INT, " +
                                                              "    QuestionNumber VARCHAR(50), " +
-                                                             "    AnswerID INT, " +
+                                                             "    AnswerID VARCHAR(50), " +
                                                              "    AnswerText VARCHAR(MAX) " +
                                                              ")";
 
@@ -424,11 +422,23 @@ namespace AccessElectionsService.api.Controllers
                 foreach (XmlNode questionNode in xmlDoc.SelectNodes("//Question"))
                 {
                     string questionNumber = questionNode.Attributes["ID"].Value;
-                    string answerText = questionNode.SelectSingleNode("Answer").InnerText;
                     int? questionId = GetQuestionId(targetConnectionString, questionNumber);
-                    int? answerId = GetAnswerId(targetConnectionString, questionId, answerText);
+                    List<string> answerTexts = new List<string>();
+                    List<int?> answerIds = new List<int?>();
 
-                    InsertResponseResult(targetConnectionString, surveyId, questionId, questionNumber, answerId, answerId == null ? answerText : null);
+                    foreach (XmlNode answerNode in questionNode.SelectNodes("Answer"))
+                    {
+                        string answerText = answerNode.InnerText;
+                        int? answerId = GetAnswerId(targetConnectionString, questionId, answerText);
+
+                        answerTexts.Add(answerText);
+                        answerIds.Add(answerId);
+                    }
+
+                    string answerIdsString = string.Join(",", answerIds.Select(id => id.ToString()).ToArray());
+                    string answerTextsString = string.Join(";", answerTexts.ToArray());
+
+                    InsertResponseResult(targetConnectionString, surveyId, questionId, questionNumber, answerIdsString, answerTextsString);
                 }
             }
             catch (Exception ex)
@@ -520,7 +530,7 @@ namespace AccessElectionsService.api.Controllers
             return null;
         }
 
-        private void InsertResponseResult(string connectionString, int surveyId, int? questionId, string questionNumber, int? answerId, string? answerText)
+        private void InsertResponseResult(string connectionString, int surveyId, int? questionId, string questionNumber, string answerId, string? answerText)
         {
             string insertQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, QuestionNumber, AnswerID, AnswerText) " +
                                  "VALUES (@SurveyID, @QuestionID, @QuestionNumber, @AnswerID, @AnswerText)";
