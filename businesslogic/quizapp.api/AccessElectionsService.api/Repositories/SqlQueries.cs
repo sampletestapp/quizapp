@@ -48,7 +48,8 @@ namespace AccessElectionsService.api.Repositories
                                                            "VALUES (@SurveyID, @QuestionID, @QuestionNumber, @Answer, @AdditionalInfo)";
 
         public const string SelectResponseResultsForPPlIdAndElectionIdQuery = @"
-                                            SELECT rr.*, 
+                                            SELECT rr.*,
+	                                            q.QuestionTypeId,
                                                 STUFF((
                                                     SELECT '; ' + qa.QuestionAnswerText
                                                     FROM AE.QuestionAnswer qa
@@ -56,6 +57,7 @@ namespace AccessElectionsService.api.Repositories
                                                     FOR XML PATH('')), 1, 2, '') AS QuestionAnswerText
                                             FROM AE.ResponseResults rr
                                             INNER JOIN AE.Survey s ON rr.SurveyID = s.ID
+                                            INNER JOIN AE.Question q ON rr.QuestionID = q.ID
                                             WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
 
         //public const string RestoreDatabaseQuery = $"RESTORE DATABASE [{_restoreDbName}] FROM DISK = '{backupFilePath}' WITH REPLACE, STATS = 10";

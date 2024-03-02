@@ -42,8 +42,8 @@ namespace AccessElectionsService.api.Repositories
                                     Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                     SurveyID = reader.GetInt32(reader.GetOrdinal("SurveyID")),
                                     QuestionID = reader.IsDBNull(reader.GetOrdinal("QuestionID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionID")),
+                                    QuestionTypeID = reader.IsDBNull(reader.GetOrdinal("QuestionTypeId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionTypeId")),
                                     QuestionNumber = reader.IsDBNull(reader.GetOrdinal("QuestionNumber")) ? null : reader.GetString(reader.GetOrdinal("QuestionNumber")),
-                                    //AnswerID = GetAnswerIds(reader),
                                     Answers = reader.IsDBNull(reader.GetOrdinal("AdditionalInfo")) ? null : reader.GetString(reader.GetOrdinal("AdditionalInfo")),
                                     AdditionalInfo = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerText"))
                                 };
@@ -60,34 +60,6 @@ namespace AccessElectionsService.api.Repositories
             }
 
             return records;
-        }
-
-        private List<int> GetAnswerIds(SqlDataReader reader)
-        {
-            _logger.LogDebug("Getting GetAnswerIds");
-            try
-            {
-                var answerIdOrdinal = reader.GetOrdinal("Answer");
-                var answerIdString = reader.IsDBNull(answerIdOrdinal) ? null : reader.GetString(answerIdOrdinal);
-
-                if (string.IsNullOrEmpty(answerIdString))
-                {
-                    _logger.LogDebug("Returning empty AnswerIds");
-                    return new List<int>();
-                }
-                else
-                {
-                    var answerIdList = answerIdString.Split(',').Select(s => int.Parse(s)).ToList();
-                    _logger.LogDebug($"Obtained AnswerIds {answerIdList.ToString()}");
-                    return answerIdList;
-                }
-               
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in getting answers : {ex.Message}");
-                throw;
-            }
         }
     }
 }

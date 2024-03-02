@@ -5,6 +5,7 @@
         public int Id { get; set; } 
         public int SurveyID { get; set; }
         public int? QuestionID { get; set; }
+        public int? QuestionTypeID { get; set; }
         public string? QuestionNumber { get; set; }
         public string? Answers { get; set; }
         public string? AdditionalInfo { get; set; }
