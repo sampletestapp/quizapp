@@ -6,9 +6,8 @@
         public int SurveyID { get; set; }
         public int? QuestionID { get; set; }
         public string? QuestionNumber { get; set; }
-        public List<int>? AnswerID { get; set; }
-        public string? AnswerAddon { get; set; }
-        public string? QuestionAnswerText { get; set; }
+        public string? Answers { get; set; }
+        public string? AdditionalInfo { get; set; }
     }
 
     public class UpdateResponseResultModel

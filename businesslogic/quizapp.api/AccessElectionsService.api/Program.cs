@@ -3,6 +3,7 @@ using AccessElectionsService.api.Data;
 using AccessElectionsService.api.Mappers;
 using AccessElectionsService.api.Repositories;
 using AccessElectionsService.api.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
@@ -20,15 +21,21 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<ISurveyResponseService, SurveyResponseService>();
+builder.Services.AddScoped<IExportRepository, ExportRepository>();
+builder.Services.AddTransient<IProcessingSurveyRepository, ProcessingSurveyRepository>();
+builder.Services.AddTransient<IResponseResultRepository, ResponseResultRepository>();
 
 builder.Services.AddAutoMapper(x => x.AddProfile(new EntityMapper()));
 
+builder.Host.UseSerilog();
+Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
 
 builder.Services.AddDbContext<AccessElectionsDbContext>(options =>
        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
