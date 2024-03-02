@@ -70,11 +70,15 @@ namespace AccessElectionsService.api.Controllers
                     connection.Open();
 
                     string selectRecordsQuery = @"
-                                                SELECT rr.*, qa.QuestionAnswerText as QuestionAnswerText
-                                                FROM AE.ResponseResults rr
-                                                INNER JOIN AE.Survey s ON rr.SurveyID = s.ID
-                                                LEFT JOIN AE.QuestionAnswer qa ON rr.AnswerID = qa.Id
-                                                WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
+                                            SELECT rr.*, 
+                                                STUFF((
+                                                    SELECT '; ' + qa.QuestionAnswerText
+                                                    FROM AE.QuestionAnswer qa
+                                                    WHERE CHARINDEX(',' + CAST(qa.Id AS VARCHAR) + ',', ',' + rr.AnswerID + ',') > 0
+                                                    FOR XML PATH('')), 1, 2, '') AS QuestionAnswerText
+                                            FROM AE.ResponseResults rr
+                                            INNER JOIN AE.Survey s ON rr.SurveyID = s.ID
+                                            WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
 
 
                     using (SqlCommand selectCommand = new SqlCommand(selectRecordsQuery, connection))
@@ -89,11 +93,11 @@ namespace AccessElectionsService.api.Controllers
                                 // Map data to your model and add to the list
                                 ResponseResultModel record = new ResponseResultModel
                                 {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Id")), 
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                     SurveyID = reader.GetInt32(reader.GetOrdinal("SurveyID")),
                                     QuestionID = reader.IsDBNull(reader.GetOrdinal("QuestionID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionID")),
                                     QuestionNumber = reader.IsDBNull(reader.GetOrdinal("QuestionNumber")) ? null : reader.GetString(reader.GetOrdinal("QuestionNumber")),
-                                    AnswerID = reader.IsDBNull(reader.GetOrdinal("AnswerID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("AnswerID")),
+                                    AnswerID = GetAnswerIds(reader),
                                     AnswerAddon = reader.IsDBNull(reader.GetOrdinal("AnswerText")) ? null : reader.GetString(reader.GetOrdinal("AnswerText")),
                                     QuestionAnswerText = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerText"))
                                 };
@@ -112,6 +116,30 @@ namespace AccessElectionsService.api.Controllers
             return records;
         }
 
+        private static List<int> GetAnswerIds(SqlDataReader reader)
+        {
+            try
+            {
+                var answerIdOrdinal = reader.GetOrdinal("AnswerID");
+                var answerIdString = reader.IsDBNull(answerIdOrdinal) ? null : reader.GetString(answerIdOrdinal);
+
+                if (string.IsNullOrEmpty(answerIdString))
+                {
+                    return new List<int>();
+                }
+                else
+                {
+                    var answerIdList = answerIdString.Split(',').Select(s => int.Parse(s)).ToList();
+                    return answerIdList;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
 
         [HttpGet("get-answer-ids")]
         public IActionResult GetAnswerIds(int questionId)
@@ -431,8 +459,16 @@ namespace AccessElectionsService.api.Controllers
                         string answerText = answerNode.InnerText;
                         int? answerId = GetAnswerId(targetConnectionString, questionId, answerText);
 
-                        answerTexts.Add(answerText);
-                        answerIds.Add(answerId);
+                        if (answerText != null)
+                        {
+                            answerTexts.Add(answerText);
+                        }
+
+                        if (answerId != null)
+                        {
+                            answerIds.Add(answerId);
+                        }
+
                     }
 
                     string answerIdsString = string.Join(",", answerIds.Select(id => id.ToString()).ToArray());
