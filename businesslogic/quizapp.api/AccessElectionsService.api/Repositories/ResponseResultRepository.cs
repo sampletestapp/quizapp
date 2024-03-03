@@ -1,5 +1,4 @@
-﻿using AccessElectionsService.api.Controllers;
-using AccessElectionsService.api.Models;
+﻿using AccessElectionsService.api.Models;
 using Microsoft.Data.SqlClient;
 
 namespace AccessElectionsService.api.Repositories
@@ -60,6 +59,45 @@ namespace AccessElectionsService.api.Repositories
             }
 
             return records;
+        }
+
+        public void UpdatingResponseForQuestion(UpdateResponseResultModel updatedRecord)
+        {
+            _logger.LogDebug($"Updating Survey resoponse {updatedRecord.QuestionID}");
+            try
+            {
+                string? targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+                UpdateRecord(targetConnectionString, updatedRecord);
+                _logger.LogDebug($"Updated Survey resoponse {updatedRecord.QuestionID}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Updating Survey resoponse Exception: {ex.Message}");
+            }
+        }
+
+        private void UpdateRecord(string? connectionString, UpdateResponseResultModel updatedRecord)
+        {
+            _logger.LogDebug($"Updating Survey resoponse record {updatedRecord.QuestionID}");
+            try
+            {
+               using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand updateCommand = new SqlCommand(SqlQueries.UpdateSurveyResponseRecordQuery, connection))
+                    {
+                        updateCommand.Parameters.AddWithValue("@Id", updatedRecord.Id);
+                        updateCommand.Parameters.AddWithValue("@Answer", updatedRecord.Answers ?? (object)DBNull.Value);
+                        updateCommand.Parameters.AddWithValue("@AdditionalInfo", string.IsNullOrEmpty(updatedRecord.AdditionalInfo) ? (object)DBNull.Value : updatedRecord.AdditionalInfo);
+                        updateCommand.ExecuteNonQuery();
+                    }
+                }
+                _logger.LogDebug($"Updated Survey resoponse record {updatedRecord.QuestionID}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Updating Survey resoponse records Exception: {ex.Message}");
+            }
         }
     }
 }

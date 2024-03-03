@@ -60,6 +60,11 @@ namespace AccessElectionsService.api.Repositories
                                             INNER JOIN AE.Question q ON rr.QuestionID = q.ID
                                             WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
 
+        public const string UpdateSurveyResponseRecordQuery = @"
+                                        UPDATE AE.ResponseResults
+                                        SET Answer = @Answer, AdditionalInfo = @AdditionalInfo
+                                        WHERE Id = @Id";
+
         //public const string RestoreDatabaseQuery = $"RESTORE DATABASE [{_restoreDbName}] FROM DISK = '{backupFilePath}' WITH REPLACE, STATS = 10";
         public const string RestoreDatabaseQuery = "RESTORE DATABASE [{0}] FROM DISK = '{1}' " +
                                                    "WITH FILE = 1,  MOVE N'{0}' TO N'C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA\\{0}_Data.mdf'," +

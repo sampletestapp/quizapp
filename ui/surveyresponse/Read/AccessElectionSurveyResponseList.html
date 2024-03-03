@@ -13,13 +13,11 @@
   <table>
     <thead>
       <tr>
-        <!-- <th>ID</th> -->
         <th>Survey ID</th>
-        <!-- <th>Question ID</th> -->
         <th>Question Number</th>
-        <!-- <th>Answer ID</th> -->
-        <th>Answer Text</th>
-        <th>Answer AddOn</th>
+        <th>Question Type</th>
+        <th>Answers</th>
+        <th>Additional Info</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -35,20 +33,16 @@
       <div id="question-inputs">
         <!-- Question inputs will be populated here -->
       </div>
-      <div id="answertext">
-        <p>Answer:</p>
-        <textarea id="answer" rows="4" cols="50"></textarea>
+      <div id="answers">
+        <p>Answer/Additional Info</p>
+        <textarea id="answerOrAdditionalInfo" rows="4" cols="50"></textarea>
       </div>
       <button onclick="saveRecord()">Save</button>
     </div>
   </div>
 
-  <script src="AccessElectionSurveyResponseList.js">
-  </script>
+  <script src="AccessElectionSurveyResponseList.js"></script>
+  <script src="AccessElectionSurveyResponseEdit.js"></script>
 </body>
 
 </html>
-
-<!-- //answer id to answer text
-//question Type column
-//multi select answers should all be viewed as a single row -->

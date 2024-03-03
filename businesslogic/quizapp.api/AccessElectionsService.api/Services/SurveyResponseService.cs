@@ -24,6 +24,11 @@ namespace AccessElectionsService.api.Services
             return _responseResultRepository.GetResponseForPPLAndElectionId(pplId, electionId);
         }
 
+        public void UpdatingResponseForQuestion(UpdateResponseResultModel UpdatedRecord)
+        {
+            _responseResultRepository.UpdatingResponseForQuestion(UpdatedRecord);
+        }
+
         public void LoadData(DataHandler dataHandler)
         {
             _logger.LogDebug($"Loading Survey Response service");

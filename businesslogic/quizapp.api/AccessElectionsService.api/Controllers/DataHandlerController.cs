@@ -50,5 +50,22 @@ namespace AccessElectionsService.api.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+        [HttpPost("updatesurveyresponse")]
+        public IActionResult UpdateSurveyResponse([FromBody] UpdateResponseResultModel updatedRecord)
+        {
+            _logger.LogDebug($"Updating Survey resoponse {updatedRecord.QuestionID}");
+            try
+            {
+                _dataLoadService.UpdatingResponseForQuestion(updatedRecord); ;
+                _logger.LogDebug($"Updated Survey resoponse {updatedRecord.QuestionID}");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Updating Survey resoponse Exception: {ex.Message}");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
     }
 }
