@@ -41,9 +41,12 @@ namespace AccessElectionsService.api.Repositories
                                     Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                     SurveyID = reader.GetInt32(reader.GetOrdinal("SurveyID")),
                                     QuestionID = reader.IsDBNull(reader.GetOrdinal("QuestionID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionID")),
+                                    QuestionText = reader.IsDBNull(reader.GetOrdinal("QuestionText")) ? null : reader.GetString(reader.GetOrdinal("QuestionText")),
                                     QuestionTypeID = reader.IsDBNull(reader.GetOrdinal("QuestionTypeId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QuestionTypeId")),
                                     QuestionNumber = reader.IsDBNull(reader.GetOrdinal("QuestionNumber")) ? null : reader.GetString(reader.GetOrdinal("QuestionNumber")),
                                     Answers = reader.IsDBNull(reader.GetOrdinal("Answer")) ? null : reader.GetString(reader.GetOrdinal("Answer")),
+                                    AnswerTexts = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerText")).Split(';').ToList(),
+                                    QuestionAnswerFindingText = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerFindingText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerFindingText")).Split(';').ToList(),
                                     AdditionalInfo = reader.IsDBNull(reader.GetOrdinal("AdditionalInfo")) ? null : reader.GetString(reader.GetOrdinal("AdditionalInfo"))
                                 };
                                 records.Add(record);

@@ -49,16 +49,26 @@ namespace AccessElectionsService.api.Repositories
 
         public const string SelectResponseResultsForPPlIdAndElectionIdQuery = @"
                                             SELECT rr.*,
-	                                            q.QuestionTypeId,
-                                                STUFF((
-                                                    SELECT '; ' + qa.QuestionAnswerText
+                                                  q.QuestionTypeId,
+                                                  q.QuestionText,
+                                                  STUFF((
+                                                    SELECT ';' + qa.QuestionAnswerText
                                                     FROM AE.QuestionAnswer qa
                                                     WHERE CHARINDEX(',' + CAST(qa.Id AS VARCHAR) + ',', ',' + rr.Answer + ',') > 0
-                                                    FOR XML PATH('')), 1, 2, '') AS QuestionAnswerText
-                                            FROM AE.ResponseResults rr
-                                            INNER JOIN AE.Survey s ON rr.SurveyID = s.ID
-                                            INNER JOIN AE.Question q ON rr.QuestionID = q.ID
-                                            WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
+                                                    FOR XML PATH('')
+                                                  ), 1, 1, '') AS QuestionAnswerText,
+                                                  STUFF((
+                                                    SELECT ';' + qaf.QuestionAnswerFindingText
+                                                    FROM AE.QuestionAnswer qa
+                                                    LEFT JOIN AE.QuestionAnswerFinding qaf ON qa.Id = qaf.QuestionAnswerId
+                                                    WHERE CHARINDEX(',' + CAST(qa.Id AS VARCHAR) + ',', ',' + rr.Answer + ',') > 0
+                                                    ORDER BY qaf.Id ASC
+                                                    FOR XML PATH('')
+                                                  ), 1, 1, '') AS QuestionAnswerFindingText
+                                                FROM AE.ResponseResults rr
+                                                INNER JOIN AE.Survey s ON rr.SurveyID = s.ID
+                                                INNER JOIN AE.Question q ON rr.QuestionID = q.ID
+                                                WHERE s.PPLID = @PPLID AND s.ElectionID = @ElectionID";
 
         public const string UpdateSurveyResponseRecordQuery = @"
                                         UPDATE AE.ResponseResults
