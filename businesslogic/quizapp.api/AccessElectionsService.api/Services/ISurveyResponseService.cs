@@ -10,5 +10,6 @@ namespace AccessElectionsService.api.Services
         void LoadData(DataHandler dataHandler);
         List<ResponseResultModel> GetResponseForPPLAndElectionId(int pplId, int electionId);
         void UpdatingResponseForQuestion(UpdateResponseResultModel UpdatedRecord);
+        void UpdateResponseDashboardAvaialbility(List<UpdateResponseDashboardAvaialbilityModel> records);
     }
 }

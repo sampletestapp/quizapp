@@ -1,8 +1,37 @@
 const getQuestionUrl = 'http://localhost:5253/api/Questions/';
 const getAnswerIdsUrl = 'http://localhost:5253/api/DataHandler/get-answer-ids';
 const updateRecordUrl = 'http://localhost:5253/api/DataHandler/updatesurveyresponse';
+const updateResponseDashboardAvaialbilityUrl = 'http://localhost:5253/api/DataHandler/updateResponseDashboardAvaialbility';
 
 let currentRecord = null;
+
+
+function updateAllRecords() {
+  var selectedRecords = [];
+  var checkboxes = document.querySelectorAll('.dashboard-checkbox');
+  checkboxes.forEach(checkbox => {
+      var recordId = checkbox.getAttribute('data-id');
+      selectedRecords.push({
+        id: recordId,
+        availableForDashboard: checkbox.checked // Assuming available for dashboard if checkbox is checked
+      });
+  });
+
+  $.ajax({
+    url: updateResponseDashboardAvaialbilityUrl,
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(selectedRecords),
+    success: function (response) {
+      console.log(response);
+      location.reload();
+    },
+    error: function (error) {
+      console.error('Error updating records:', error);
+    }
+  });
+}
+
 
 function editRecord(id) {
   // Find the record in the data array
@@ -86,6 +115,13 @@ function closeEditModal() {
   document.getElementById('edit-modal').style.display = 'none';
 }
 
+function selectAllRows() {
+  var checkboxes = document.getElementsByClassName('dashboard-checkbox');
+  for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = document.getElementById('select-all-checkbox').checked;
+  }
+}
+
 function saveRecord() {
   // Update the currentRecord with the selected answer ID based on the question type
   var answerOrAdditionalInfo = document.getElementById('answerOrAdditionalInfo');
@@ -103,7 +139,8 @@ function saveRecord() {
       .map(input => parseInt(input.value)).join(",");
     currentRecord.Answers = selectedAnswers.length > 0 ? selectedAnswers : null;
   }
-  console.log(currentRecord);
+
+  currentRecord.availableForDashboard = document.querySelector('.dashboard-checkbox').checked;
   $.ajax({
     url: updateRecordUrl,
     type: 'POST',

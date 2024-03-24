@@ -22,7 +22,7 @@ namespace AccessElectionsService.api.Controllers
             _logger.LogDebug("DataHandlerController Data Loading");
             try
             {
-                dataHandler.backupFilePath = "D:\\Work\\Tobedeeleted\\Naren\\test.bak";
+                dataHandler.backupFilePath = "D:\\Work\\Tobedeeleted\\Naren\\T_016.bak";
                 _dataLoadService.LoadData(dataHandler);
                 _logger.LogDebug("DataHandlerController Data Loaded");
                 return Ok("Data copy process completed.");
@@ -67,5 +67,26 @@ namespace AccessElectionsService.api.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+
+        [HttpPost]
+        [Route("updateResponseDashboardAvaialbility")]
+        public IActionResult UpdateResponseDashboardAvaialbility([FromBody] List<UpdateResponseDashboardAvaialbilityModel> records)
+        {
+
+            _logger.LogDebug($"Update Response Dashboard Avaialbility");
+            try
+            {
+                _dataLoadService.UpdateResponseDashboardAvaialbility(records); ;
+                _logger.LogDebug($"Update Response Dashboard Avaialbility");
+                return Ok("Records updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug($"Update Response Dashboard Avaialbility");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
     }
 }

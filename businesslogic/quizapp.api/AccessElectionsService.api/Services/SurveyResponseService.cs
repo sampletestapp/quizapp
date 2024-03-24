@@ -29,6 +29,11 @@ namespace AccessElectionsService.api.Services
             _responseResultRepository.UpdatingResponseForQuestion(UpdatedRecord);
         }
 
+        public void UpdateResponseDashboardAvaialbility(List<UpdateResponseDashboardAvaialbilityModel> records)
+        {
+            _responseResultRepository.UpdateResponseDashboardAvaialbility(records);
+        }
+
         public void LoadData(DataHandler dataHandler)
         {
             _logger.LogDebug($"Loading Survey Response service");

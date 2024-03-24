@@ -12,6 +12,7 @@
         public List<string>? AnswerTexts { get; set; }
         public List<string>? QuestionAnswerFindingText { get; set; }
         public string? AdditionalInfo { get; set; }
+        public bool AvailableForDashboard { get; set; }
     }
 
     public class UpdateResponseResultModel
@@ -22,5 +23,12 @@
         public string? QuestionNumber { get; set; }
         public string? Answers { get; set; }
         public string? AdditionalInfo { get; set; }
+    }
+
+
+    public class UpdateResponseDashboardAvaialbilityModel
+    {
+        public int Id { get; set; }
+        public bool AvailableForDashboard { get; set; }
     }
 }

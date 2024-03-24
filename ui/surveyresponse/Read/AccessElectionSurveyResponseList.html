@@ -10,9 +10,11 @@
 </head>
 
 <body>
+  <button onclick="updateAllRecords()">Update Response</button>
   <table>
     <thead>
       <tr>
+        <th style="display: none;">ID</th> <!-- Hide the ID column -->
         <th>Survey ID</th>
         <th>Question Number</th>
         <th>Question</th>
@@ -21,6 +23,8 @@
         <th>Answer Texts</th>
         <th>Findings</th>
         <th>Additional Info</th>
+        <th><input type="checkbox" id="select-all-checkbox" onclick="selectAllRows()"> Available for Dashboard</th>
+        </th>
         <th>Action</th>
       </tr>
     </thead>

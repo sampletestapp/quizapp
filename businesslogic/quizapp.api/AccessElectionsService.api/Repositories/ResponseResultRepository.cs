@@ -47,7 +47,8 @@ namespace AccessElectionsService.api.Repositories
                                     Answers = reader.IsDBNull(reader.GetOrdinal("Answer")) ? null : reader.GetString(reader.GetOrdinal("Answer")),
                                     AnswerTexts = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerText")).Split(';').ToList(),
                                     QuestionAnswerFindingText = reader.IsDBNull(reader.GetOrdinal("QuestionAnswerFindingText")) ? null : reader.GetString(reader.GetOrdinal("QuestionAnswerFindingText")).Split(';').ToList(),
-                                    AdditionalInfo = reader.IsDBNull(reader.GetOrdinal("AdditionalInfo")) ? null : reader.GetString(reader.GetOrdinal("AdditionalInfo"))
+                                    AdditionalInfo = reader.IsDBNull(reader.GetOrdinal("AdditionalInfo")) ? null : reader.GetString(reader.GetOrdinal("AdditionalInfo")),
+                                    AvailableForDashboard = reader.IsDBNull(reader.GetOrdinal("AvailableForDashboard")) ? false : reader.GetBoolean(reader.GetOrdinal("AvailableForDashboard"))
                                 };
                                 records.Add(record);
                             }
@@ -76,6 +77,35 @@ namespace AccessElectionsService.api.Repositories
             catch (Exception ex)
             {
                 _logger.LogError($"Updating Survey resoponse Exception: {ex.Message}");
+            }
+        }
+
+
+        public void UpdateResponseDashboardAvaialbility(List<UpdateResponseDashboardAvaialbilityModel> Records)
+        {
+            _logger.LogDebug($"Updating Response Dashboard Avaialbility");
+            try
+            {
+                string? targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+                using (SqlConnection connection = new SqlConnection(targetConnectionString))
+                {
+                    connection.Open();
+                    foreach (var record in Records)
+                    {
+                        using (SqlCommand command = new SqlCommand(SqlQueries.UpdateDashboardAvailabilityQuery, connection))
+                        {
+                            command.Parameters.AddWithValue("@AvailableForDashboard", record.AvailableForDashboard);
+                            command.Parameters.AddWithValue("@Id", record.Id);
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                _logger.LogDebug($"Updating Response Dashboard Avaialbility");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Updating Response Dashboard Avaialbility Exception: {ex.Message}");
             }
         }
 

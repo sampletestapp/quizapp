@@ -31,8 +31,13 @@ namespace AccessElectionsService.api.Repositories
                                                                "    QuestionID INT, " +
                                                                "    QuestionNumber VARCHAR(50), " +
                                                                "    Answer VARCHAR(50), " +
-                                                               "    AdditionalInfo VARCHAR(MAX) " +
+                                                               "    AdditionalInfo VARCHAR(MAX), " +
+                                                               "    AvailableForDashboard BIT DEFAULT 0 " + // New column 
                                                                ")";
+
+
+
+        public const string UpdateDashboardAvailabilityQuery = @"UPDATE AE.ResponseResults SET AvailableForDashboard = @AvailableForDashboard WHERE ID = @Id;";
 
         public const string InsertDataIntoSurveyQuery = "INSERT INTO AE.Survey (PPLID, ElectionID, ConductedDate, CreatedUserID) " +
                                                         "VALUES (@PPLID, @ElectionID, @ConductedDate ,@CreatedUserID);" +
@@ -44,8 +49,8 @@ namespace AccessElectionsService.api.Repositories
 
         public const string GetQuestionTypeFromNumberQuery = "SELECT [QuestionTypeId] FROM AE.Question WHERE [QuestionNumber] = @QuestionID";
 
-        public const string InsertToResponseResultsQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, QuestionNumber, Answer, AdditionalInfo) " +
-                                                           "VALUES (@SurveyID, @QuestionID, @QuestionNumber, @Answer, @AdditionalInfo)";
+        public const string InsertToResponseResultsQuery = "INSERT INTO AE.ResponseResults (SurveyID, QuestionID, QuestionNumber, Answer, AdditionalInfo, AvailableForDashboard) " +
+                                                           "VALUES (@SurveyID, @QuestionID, @QuestionNumber, @Answer, @AdditionalInfo, @AvailableForDashboard)";
 
         public const string SelectResponseResultsForPPlIdAndElectionIdQuery = @"
                                             SELECT rr.*,
@@ -74,6 +79,8 @@ namespace AccessElectionsService.api.Repositories
                                         UPDATE AE.ResponseResults
                                         SET Answer = @Answer, AdditionalInfo = @AdditionalInfo
                                         WHERE Id = @Id";
+
+        
 
         //public const string RestoreDatabaseQuery = $"RESTORE DATABASE [{_restoreDbName}] FROM DISK = '{backupFilePath}' WITH REPLACE, STATS = 10";
         public const string RestoreDatabaseQuery = "RESTORE DATABASE [{0}] FROM DISK = '{1}' " +
