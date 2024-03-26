@@ -31,4 +31,16 @@
         public int Id { get; set; }
         public bool AvailableForDashboard { get; set; }
     }
+
+    public class SurveyStatusUpdateModel
+    {
+        public int PplId { get; set; }
+        public string Status { get; set; }
+        public int ElectionId { get; set; }
+    }
+
+    public class ElectionStatusModel
+    {
+        public string Value { get; set; }
+    }
 }

@@ -2,6 +2,7 @@ const getQuestionUrl = 'http://localhost:5253/api/Questions/';
 const getAnswerIdsUrl = 'http://localhost:5253/api/DataHandler/get-answer-ids';
 const updateRecordUrl = 'http://localhost:5253/api/DataHandler/updatesurveyresponse';
 const updateResponseDashboardAvaialbilityUrl = 'http://localhost:5253/api/DataHandler/updateResponseDashboardAvaialbility';
+const updateSurveyStatusUrl = 'http://localhost:5253/api/DataHandler/updateSurveyStatus';
 
 let currentRecord = null;
 
@@ -110,6 +111,41 @@ function editRecord(id) {
   });
 }
 
+
+function getParameterByName(name, url) {
+  if (!url) url = window.location.href;
+  name = name.replace(/[\[\]]/g, '\\$&');
+  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+      results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+
+function updateSurveyStatus() {
+  var pplId = getParameterByName('pplId');
+  var electionId = getParameterByName('electionId');
+  var surveyStatus = $("#survey-status").val();
+  if (!pplId) {
+    console.error("pplId not found in URL");
+    return;
+  }
+
+  // Make API call to update survey status with pplId and surveyStatus
+  $.ajax({
+    url: updateSurveyStatusUrl,
+    method: 'POST',
+    data: JSON.stringify({ pplId: pplId, electionId:  electionId, status: surveyStatus }),
+    contentType: 'application/json',
+    success: function(response) {
+      console.log("Survey status updated successfully:", response);
+    },
+    error: function(xhr, status, error) {
+      console.error("Error updating survey status:", error);
+    }
+  });
+}
 
 function closeEditModal() {
   document.getElementById('edit-modal').style.display = 'none';

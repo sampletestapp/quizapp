@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Reflection.PortableExecutable;
 using System.Xml;
 
 namespace AccessElectionsService.api.Repositories
@@ -265,7 +266,8 @@ namespace AccessElectionsService.api.Repositories
                     command.Parameters.AddWithValue("@QuestionNumber", questionNumber);
                     command.Parameters.AddWithValue("@Answer", answer == null ? DBNull.Value : answer);
                     command.Parameters.AddWithValue("@AdditionalInfo", additionalInfo == null ? DBNull.Value : additionalInfo);
-
+                    //when inserting response will be default null
+                    command.Parameters.AddWithValue("@AvailableForDashboard", false);
                     command.ExecuteNonQuery();
                 }
             }

@@ -11,5 +11,7 @@ namespace AccessElectionsService.api.Services
         List<ResponseResultModel> GetResponseForPPLAndElectionId(int pplId, int electionId);
         void UpdatingResponseForQuestion(UpdateResponseResultModel UpdatedRecord);
         void UpdateResponseDashboardAvaialbility(List<UpdateResponseDashboardAvaialbilityModel> records);
+        void UpdateSurveyStatus(SurveyStatusUpdateModel surveyStatusUpdate);
+        string GetSurveyStatus(int pplId, int electionId);
     }
 }

@@ -20,6 +20,7 @@ namespace AccessElectionsService.api.Repositories
                                                      "    ElectionID INT, " +
                                                      "    ConductedDate DATETIME, " +
                                                      "    CreatedUserID INT, " +
+                                                     "    Status NVARCHAR(50), " + // New Status column
                                                      "    CONSTRAINT UQ_PPLID_ElectionID UNIQUE (PPLID, ElectionID)" +
                                                      ")";
 
@@ -34,8 +35,7 @@ namespace AccessElectionsService.api.Repositories
                                                                "    AdditionalInfo VARCHAR(MAX), " +
                                                                "    AvailableForDashboard BIT DEFAULT 0 " + // New column 
                                                                ")";
-
-
+        public const string UpdateSurveyStatusQuery = "UPDATE AE.Survey SET Status = @Status WHERE PPLID = @PPLID AND ElectionID = @ElectionID";
 
         public const string UpdateDashboardAvailabilityQuery = @"UPDATE AE.ResponseResults SET AvailableForDashboard = @AvailableForDashboard WHERE ID = @Id;";
 
@@ -80,7 +80,13 @@ namespace AccessElectionsService.api.Repositories
                                         SET Answer = @Answer, AdditionalInfo = @AdditionalInfo
                                         WHERE Id = @Id";
 
-        
+
+        public const string GetSurveyStatusQuery = @"
+                                                    SELECT Status
+                                                    FROM AE.Survey
+                                                    WHERE PPLID = @PPLID
+                                                    AND ElectionID = @ElectionID";
+
 
         //public const string RestoreDatabaseQuery = $"RESTORE DATABASE [{_restoreDbName}] FROM DISK = '{backupFilePath}' WITH REPLACE, STATS = 10";
         public const string RestoreDatabaseQuery = "RESTORE DATABASE [{0}] FROM DISK = '{1}' " +

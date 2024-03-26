@@ -109,6 +109,33 @@ namespace AccessElectionsService.api.Repositories
             }
         }
 
+
+        public void UpdateSurveyStatus(SurveyStatusUpdateModel surveyStatusUpdate)
+        {
+            _logger.LogDebug($"Updating Survey Status");
+            try
+            {
+                string? targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+                using (SqlConnection connection = new SqlConnection(targetConnectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SqlQueries.UpdateSurveyStatusQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@Status", surveyStatusUpdate.Status);
+                        command.Parameters.AddWithValue("@PPLID", surveyStatusUpdate.PplId);
+                        command.Parameters.AddWithValue("@ElectionID", surveyStatusUpdate.ElectionId);
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                _logger.LogDebug($"Updated Survey Status");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Updating Survey Status Exception: {ex.Message}");
+            }
+        }
+
         private void UpdateRecord(string? connectionString, UpdateResponseResultModel updatedRecord)
         {
             _logger.LogDebug($"Updating Survey resoponse record {updatedRecord.QuestionID}");
@@ -131,6 +158,40 @@ namespace AccessElectionsService.api.Repositories
             {
                 _logger.LogError($"Updating Survey resoponse records Exception: {ex.Message}");
             }
+        }
+
+        public string GetSurveyStatus(int pplId, int electionId)
+        {
+            _logger.LogDebug($"Retrieving Survey Status");
+            string status = string.Empty;
+            try
+            {
+                string targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+                using (SqlConnection connection = new SqlConnection(targetConnectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SqlQueries.GetSurveyStatusQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@PPLID", pplId);
+                        command.Parameters.AddWithValue("@ElectionID", electionId);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                status = reader["Status"].ToString();
+                            }
+                        }
+                    }
+                }
+
+                _logger.LogDebug($"Retrieved Survey Status: {status}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Retrieving Survey Status Exception: {ex.Message}");
+            }
+
+            return status;
         }
     }
 }

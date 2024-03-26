@@ -34,6 +34,16 @@ namespace AccessElectionsService.api.Services
             _responseResultRepository.UpdateResponseDashboardAvaialbility(records);
         }
 
+        public void UpdateSurveyStatus(SurveyStatusUpdateModel surveyStatusUpdate)
+        {
+            _responseResultRepository.UpdateSurveyStatus(surveyStatusUpdate);
+        }
+
+        public string GetSurveyStatus(int pplId, int electionId) //string UpdateSurveyStatus(int pplId, int electionId);
+        {
+            return _responseResultRepository.GetSurveyStatus(pplId, electionId);
+        }
+
         public void LoadData(DataHandler dataHandler)
         {
             _logger.LogDebug($"Loading Survey Response service");

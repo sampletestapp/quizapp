@@ -10,6 +10,13 @@
 </head>
 
 <body>
+  <label for="survey-status">Survey Status:</label>
+  <select id="survey-status">
+    <option value="none">None</option>
+    <option value="pending">Pending</option>
+    <option value="completed">Completed</option>
+  </select>
+  <button onclick="updateSurveyStatus()">Update Survey Status</button>
   <button onclick="updateAllRecords()">Update Response</button>
   <table>
     <thead>

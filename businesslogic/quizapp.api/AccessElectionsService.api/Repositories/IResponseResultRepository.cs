@@ -7,5 +7,7 @@ namespace AccessElectionsService.api.Repositories
         List<ResponseResultModel> GetResponseForPPLAndElectionId(int pplId, int electionId);
         void UpdatingResponseForQuestion(UpdateResponseResultModel UpdatedRecord);
         void UpdateResponseDashboardAvaialbility(List<UpdateResponseDashboardAvaialbilityModel> Records);
+        void UpdateSurveyStatus(SurveyStatusUpdateModel surveyStatusUpdate);
+        string GetSurveyStatus(int pplId, int electionId);
     }
 }

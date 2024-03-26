@@ -1,4 +1,5 @@
 const getDataUrl = 'http://localhost:5253/api/DataHandler/getsurveyresponse';
+const getSurveyStatusUrl = 'http://localhost:5253/api/DataHandler/getSurveyStatus';
 
 let data = []; // Declare data outside the fetch chain
 
@@ -6,6 +7,34 @@ document.addEventListener('DOMContentLoaded', function () {
     var urlParams = new URLSearchParams(window.location.search);
     var pplid = urlParams.get('pplId');
     var electionid = urlParams.get('electionId');
+
+    // Fetch election status
+    fetch(`${getSurveyStatusUrl}?PPLID=${pplid}&ElectionID=${electionid}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch election status');
+            }
+            return response.json();
+        })
+        .then(electionStatusData => {
+            const surveyStatusDropdown = document.getElementById('survey-status');
+            const selectedStatus = electionStatusData.status; // Assuming the response contains the status value
+
+            // Loop through each option in the dropdown
+            for (let i = 0; i < surveyStatusDropdown.options.length; i++) {
+                // Check if the option value matches the selected status
+                if (surveyStatusDropdown.options[i].value === selectedStatus) {
+                    // Set the selected attribute for the matching option
+                    surveyStatusDropdown.options[i].selected = true;
+                    break; // Exit the loop after setting the selected option
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching election status:', error);
+        });
+
+
 
     fetch(`${getDataUrl}?PPLID=${pplid}&ElectionID=${electionid}`)
         .then(response => response.json())

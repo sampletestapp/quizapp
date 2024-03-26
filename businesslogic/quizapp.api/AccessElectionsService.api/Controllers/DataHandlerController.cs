@@ -78,15 +78,51 @@ namespace AccessElectionsService.api.Controllers
             try
             {
                 _dataLoadService.UpdateResponseDashboardAvaialbility(records); ;
-                _logger.LogDebug($"Update Response Dashboard Avaialbility");
+                _logger.LogDebug($"Update Response Dashboard Avaialbility successfully");
                 return Ok("Records updated successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogDebug($"Update Response Dashboard Avaialbility");
+                _logger.LogDebug($"Update Response Dashboard Avaialbility resoponse Exception");
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
+        [HttpPost]
+        [Route("updateSurveyStatus")]
+        public IActionResult UpdateSurveyStatus([FromBody] SurveyStatusUpdateModel surveyStatusUpdate)
+        {
+            _logger.LogDebug($"Update Survey Status");
+            try
+            {
+                _dataLoadService.UpdateSurveyStatus(surveyStatusUpdate); ;
+                _logger.LogDebug($"Update Survey Status successfully");
+                return Ok("Records updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug($"Update Survey Status resoponse Exception");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet]
+        [Route("getSurveyStatus")]
+        public IActionResult GetSurveyStatus(int pplId, int electionId) 
+        {
+            _logger.LogDebug($"get Survey Status");
+            try
+            {
+                var status = _dataLoadService.GetSurveyStatus(pplId,electionId); ;
+                _logger.LogDebug($"get Survey Status successfully");
+                return Ok(new { status });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug($"get Survey Status resoponse Exception");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
     }
 }
