@@ -1,6 +1,7 @@
 ﻿using AccessElectionsService.api.Models;
 using AccessElectionsService.api.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace AccessElectionsService.api.Controllers
 {
@@ -124,5 +125,63 @@ namespace AccessElectionsService.api.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+        [HttpGet]
+        [Route("getPhotos")]
+        public IActionResult GetDummyUrls(int id)
+        {
+            Random _random = new Random();
+            var urls = new List<string>
+            {
+                "https://www.google.com/",
+                "https://www.google.com/search?q=dummy",
+                "https://www.google.com/maps",
+                "https://www.google.com/images",
+                "https://www.google.com/news"
+            };
+
+            var selectedUrls = new List<string>();
+            for (int i = 0; i < 3; i++)
+            {
+                int index = _random.Next(urls.Count);
+                selectedUrls.Add(urls[index]);
+            }
+
+            return Ok(selectedUrls);
+        }
+
+        [HttpPost("uploadPhotos")]
+        public async Task<IActionResult> UploadPhoto(IFormFile photo)
+        {
+            if (photo == null || photo.Length == 0)
+            {
+                return BadRequest("Invalid file");
+            }
+
+            try
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + photo.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await photo.CopyToAsync(stream);
+                }
+
+                return Ok(new { filePath });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }
+
+

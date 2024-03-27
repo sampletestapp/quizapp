@@ -122,7 +122,6 @@ function getParameterByName(name, url) {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-
 function updateSurveyStatus() {
   var pplId = getParameterByName('pplId');
   var electionId = getParameterByName('electionId');

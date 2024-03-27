@@ -23,13 +23,12 @@
       <tr>
         <th style="display: none;">ID</th> <!-- Hide the ID column -->
         <th>Survey ID</th>
-        <th>Question Number</th>
         <th>Question</th>
         <th>Question Type</th>
-        <th>Answers</th>
         <th>Answer Texts</th>
         <th>Findings</th>
         <th>Additional Info</th>
+        <th>Photos</th>
         <th><input type="checkbox" id="select-all-checkbox" onclick="selectAllRows()"> Available for Dashboard</th>
         </th>
         <th>Action</th>
@@ -54,6 +53,16 @@
       <button onclick="saveRecord()">Save</button>
     </div>
   </div>
+  <!-- Modal for photos -->
+  <div id="photos-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePhotosModal()">&times;</span>
+        <h2>Photos</h2>
+        <div id="photos-list"></div>
+        <input type="file" id="photo-file" accept="image/*">
+        <button onclick="uploadPhoto()">Upload Photo</button>
+    </div>
+</div>
 
   <script src="AccessElectionSurveyResponseList.js"></script>
   <script src="AccessElectionSurveyResponseEdit.js"></script>
