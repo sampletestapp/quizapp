@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <td rowspan="${rowspan}">${item.additionalInfo !== null ? item.additionalInfo : ''}</td>
                             <td rowspan="${rowspan}">
                                 <button onclick="fetchAndDisplayPhotos(${item.id})">View Photos</button>
-                                <div id="photos-${item.id}"></div> <!-- Placeholder for photos -->
+                                <div id="photos-${item.id}"></div>
                             </td>
                             <td rowspan="${rowspan}"><input type="checkbox" class="dashboard-checkbox" data-id="${item.id}" ${item.availableForDashboard ? 'checked' : ''}></td>
                             <td rowspan="${rowspan}"><button class="edit-button" onclick="editRecord(${item.id})">Edit</button></td>

@@ -128,7 +128,7 @@ namespace AccessElectionsService.api.Controllers
 
         [HttpGet]
         [Route("getPhotos")]
-        public IActionResult GetDummyUrls(int id)
+        public IActionResult GetSurveyPhotosUrls(int responseId)
         {
             Random _random = new Random();
             var urls = new List<string>
