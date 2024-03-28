@@ -151,7 +151,7 @@ namespace AccessElectionsService.api.Controllers
         }
 
         [HttpPost("uploadPhotos")]
-        public async Task<IActionResult> UploadPhoto(IFormFile photo)
+        public async Task<IActionResult> UploadPhoto(IFormFile photo, [FromForm] int id)
         {
             if (photo == null || photo.Length == 0)
             {

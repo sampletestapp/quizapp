@@ -12,6 +12,7 @@ function openPhotosModal() {
 
 function closePhotosModal() {
     document.getElementById('photos-modal').style.display = 'none';
+    document.getElementById('photo-file').value = '';
 }
 
 function fetchAndDisplayPhotos(id) {
@@ -31,18 +32,26 @@ function fetchAndDisplayPhotos(id) {
             });
 
             openPhotosModal(); // Open the modal after fetching and displaying photos
+
+            // Pass the item.id to the uploadPhoto function
+            document.getElementById('upload-photo-button').onclick = function () {
+                uploadPhoto(id);
+            };
         })
         .catch(error => {
             console.error('Error fetching photos:', error);
         });
 }
 
-function uploadPhoto() {
+function uploadPhoto(id) {
+    //const id = document.getElementById('upload-photo-button').getAttribute('data-id');
+
     const fileInput = document.getElementById('photo-file');
     const file = fileInput.files[0];
 
     const formData = new FormData();
     formData.append('photo', file);
+    formData.append('id', id); // Append the ID to the FormData
 
     fetch(uploadPhotoUrl, {
         method: 'POST',
@@ -60,6 +69,7 @@ function uploadPhoto() {
         console.error('Error uploading photo:', error);
     });
 }
+
 
 document.addEventListener('DOMContentLoaded', function () {
     var urlParams = new URLSearchParams(window.location.search);
