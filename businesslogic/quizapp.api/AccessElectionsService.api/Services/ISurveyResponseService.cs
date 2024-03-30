@@ -13,5 +13,6 @@ namespace AccessElectionsService.api.Services
         void UpdateResponseDashboardAvaialbility(List<UpdateResponseDashboardAvaialbilityModel> records);
         void UpdateSurveyStatus(SurveyStatusUpdateModel surveyStatusUpdate);
         string GetSurveyStatus(int pplId, int electionId);
+        List<FileExportStatsModel> GetPollingPlaceSurveyDetails();
     }
 }

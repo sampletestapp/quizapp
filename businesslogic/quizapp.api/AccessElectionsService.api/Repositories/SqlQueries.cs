@@ -87,6 +87,17 @@ namespace AccessElectionsService.api.Repositories
                                                     WHERE PPLID = @PPLID
                                                     AND ElectionID = @ElectionID";
 
+        public const string GetPollingPlaceSurveyDetails = @"
+                                                            SELECT
+                                                            PS.[ExportedSQL] AS Filename,
+                                                            COUNT(PSD.[PollingPlaceSurveyDetailsId]) AS NoOfTimesFileExported
+                                                            FROM
+                                                                [AE].[PollingPlaceSurvey] PS
+                                                            JOIN
+                                                                [AE].[PollingPlaceSurveyDetails] PSD ON PS.[PollingPlaceSurveyId] = PSD.[PollingPlaceSurveyId]
+                                                            GROUP BY
+                                                                PS.[ExportedSQL];";
+
 
         //public const string RestoreDatabaseQuery = $"RESTORE DATABASE [{_restoreDbName}] FROM DISK = '{backupFilePath}' WITH REPLACE, STATS = 10";
         public const string RestoreDatabaseQuery = "RESTORE DATABASE [{0}] FROM DISK = '{1}' " +

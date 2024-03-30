@@ -44,6 +44,11 @@ namespace AccessElectionsService.api.Services
             return _responseResultRepository.GetSurveyStatus(pplId, electionId);
         }
 
+        public List<FileExportStatsModel> GetPollingPlaceSurveyDetails() //string UpdateSurveyStatus(int pplId, int electionId);
+        {
+            return _responseResultRepository.GetPollingPlaceSurveyDetails();
+        }
+
         public void LoadData(DataHandler dataHandler)
         {
             _logger.LogDebug($"Loading Survey Response service");

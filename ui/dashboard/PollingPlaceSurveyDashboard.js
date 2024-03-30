@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             const tbody = document.getElementById('polling-place-survey-details');
 
-            data.forEach(item => {
+            data.pollingPlaceSurveryDetails.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
               <td><button onclick="downloadFile('${item.filename}')">Download</button></td>

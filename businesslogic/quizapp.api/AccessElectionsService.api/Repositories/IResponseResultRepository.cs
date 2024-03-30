@@ -9,5 +9,6 @@ namespace AccessElectionsService.api.Repositories
         void UpdateResponseDashboardAvaialbility(List<UpdateResponseDashboardAvaialbilityModel> Records);
         void UpdateSurveyStatus(SurveyStatusUpdateModel surveyStatusUpdate);
         string GetSurveyStatus(int pplId, int electionId);
+        List<FileExportStatsModel> GetPollingPlaceSurveyDetails();
     }
 }

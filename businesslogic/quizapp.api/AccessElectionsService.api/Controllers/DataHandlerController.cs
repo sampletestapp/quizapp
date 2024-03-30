@@ -185,12 +185,18 @@ namespace AccessElectionsService.api.Controllers
         [HttpGet("pollingPlaceSurveyDetails")]
         public async Task<IActionResult> PollingPlaceSurveyDetails()
         {
-            List<object> FileExportStats = new List<object>
+            _logger.LogDebug($"get Polling PlaceSurvey Details");
+            try
             {
-                new { Filename = "sample.txt", NoOfTimesFileExported = 5, NoOfFilesStatusCompleted = 5 },
-                new { Filename = "def", NoOfTimesFileExported = 3, NoOfFilesStatusCompleted = 2 }
-            };
-            return Ok(FileExportStats);
+                var pollingPlaceSurveryDetails = _dataLoadService.GetPollingPlaceSurveyDetails(); ;
+                _logger.LogDebug($"get Polling PlaceSurvey Details successfully");
+                return Ok(new { pollingPlaceSurveryDetails });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug($"Polling Plac eSurvey Details response Exception");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
 

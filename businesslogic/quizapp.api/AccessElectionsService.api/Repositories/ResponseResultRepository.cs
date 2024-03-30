@@ -1,5 +1,7 @@
 ﻿using AccessElectionsService.api.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
+using System.Reflection.PortableExecutable;
 
 namespace AccessElectionsService.api.Repositories
 {
@@ -192,6 +194,43 @@ namespace AccessElectionsService.api.Repositories
             }
 
             return status;
+        }
+
+
+        public List<FileExportStatsModel> GetPollingPlaceSurveyDetails()
+        {
+            _logger.LogDebug($"GetPolling PlaceSurvey Details");
+            List<FileExportStatsModel> FileExportStats = new List<FileExportStatsModel>();
+            try
+            {
+                string targetConnectionString = _configuration.GetConnectionString("DataTargetConnection");
+                using (SqlConnection connection = new SqlConnection(targetConnectionString))
+                {
+                    using (SqlCommand command = new SqlCommand(SqlQueries.GetPollingPlaceSurveyDetails, connection))
+                    {
+                        connection.Open();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                FileExportStats.Add(new FileExportStatsModel
+                                {
+                                    Filename = reader["Filename"].ToString(),
+                                    NoOfTimesFileExported = Convert.ToInt32(reader["NoOfTimesFileExported"]),
+                                    NoOfFilesStatusCompleted = 5
+                                });
+                            }
+                        }
+                    }
+                    _logger.LogDebug($"GetPolling PlaceSurvey Details");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Retrieving GetPolling PlaceSurvey Details Exception: {ex.Message}");
+            }
+
+            return FileExportStats;
         }
     }
 }
