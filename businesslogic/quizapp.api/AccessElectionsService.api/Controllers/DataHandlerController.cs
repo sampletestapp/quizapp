@@ -181,6 +181,41 @@ namespace AccessElectionsService.api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("pollingPlaceSurveyDetails")]
+        public async Task<IActionResult> PollingPlaceSurveyDetails()
+        {
+            List<object> FileExportStats = new List<object>
+            {
+                new { Filename = "sample.txt", NoOfTimesFileExported = 5, NoOfFilesStatusCompleted = 5 },
+                new { Filename = "def", NoOfTimesFileExported = 3, NoOfFilesStatusCompleted = 2 }
+            };
+            return Ok(FileExportStats);
+        }
+
+
+        //private readonly string _filesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Files");
+
+        [HttpGet("downloadScript")]
+        public IActionResult DownloadScript([FromQuery] string filename)
+        {
+            //try
+            //{
+            //    var filePath = Path.Combine(_filesDirectory, filename);
+            //    if (!System.IO.File.Exists(filePath))
+            //    {
+            //        return NotFound();
+            //    }
+
+            //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            //    return File(fileBytes, "application/octet-stream", filename);
+            //}
+            //catch (Exception ex)
+            //{
+            //    return StatusCode(500, $"Internal server error: {ex.Message}");
+            //}
+            return Ok();    
+        }
     }
 }
 
